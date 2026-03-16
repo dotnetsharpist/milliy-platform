@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EB24CAD1-2955-4DF2-9012-D332A544B279}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilliyMock.Api", "src\MilliyMock.Api\MilliyMock.Api.csproj", "{C42A7816-CCC1-4512-AF89-73A720F3FAE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilliyMock.DataAccess", "src\MilliyMock.DataAccess\MilliyMock.DataAccess.csproj", "{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilliyMock.Domain", "src\MilliyMock.Domain\MilliyMock.Domain.csproj", "{3561AE07-A974-44AE-9A35-CEC106B03D60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilliyMock.Service", "src\MilliyMock.Service\MilliyMock.Service.csproj", "{5D4065B0-4144-41B6-82AA-F9BBEAACCA83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MilliyMock.Shared", "src\MilliyMock.Shared\MilliyMock.Shared.csproj", "{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C42A7816-CCC1-4512-AF89-73A720F3FAE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C42A7816-CCC1-4512-AF89-73A720F3FAE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C42A7816-CCC1-4512-AF89-73A720F3FAE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C42A7816-CCC1-4512-AF89-73A720F3FAE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3561AE07-A974-44AE-9A35-CEC106B03D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3561AE07-A974-44AE-9A35-CEC106B03D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3561AE07-A974-44AE-9A35-CEC106B03D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3561AE07-A974-44AE-9A35-CEC106B03D60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D4065B0-4144-41B6-82AA-F9BBEAACCA83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D4065B0-4144-41B6-82AA-F9BBEAACCA83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D4065B0-4144-41B6-82AA-F9BBEAACCA83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D4065B0-4144-41B6-82AA-F9BBEAACCA83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C42A7816-CCC1-4512-AF89-73A720F3FAE4} = {EB24CAD1-2955-4DF2-9012-D332A544B279}
+		{F9DEB8D7-2DF9-4D1E-8D6D-B0D01489FBF8} = {EB24CAD1-2955-4DF2-9012-D332A544B279}
+		{3561AE07-A974-44AE-9A35-CEC106B03D60} = {EB24CAD1-2955-4DF2-9012-D332A544B279}
+		{5D4065B0-4144-41B6-82AA-F9BBEAACCA83} = {EB24CAD1-2955-4DF2-9012-D332A544B279}
+		{C23A68F1-F5DB-451B-916C-5E4A78DC8F6A} = {EB24CAD1-2955-4DF2-9012-D332A544B279}
+	EndGlobalSection
+EndGlobal
