@@ -10,18 +10,25 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
+            .HasIndex(u => u.Email)
             .IsUnique();
         
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = 1, FullName = "Abdurrohman", Username = "ysharpist",
-                CurrentGrade = "11", PasswordHash = PasswordHelper.Hash("nigga"),
+                Id = 1, FullName = "Abdurrohman", Email = "ysharpist",
+                PasswordHash = PasswordHelper.Hash("nigga"),
                 Role = UserRole.SuperAdmin, CreatedBy = 1
             }
         );
     }
     
     public DbSet<User> Users { get; init; }
+    public DbSet<BotUser> BotUsers { get; init; }
+    public DbSet<Test> Tests { get; init; }
+    public DbSet<QuestionGroup> QuestionGroups { get; init; }
+    public DbSet<Question> Questions { get; init; }
+    public DbSet<Option> Options { get; init; }
+    public DbSet<UserTestAttempt> UserTestAttempts { get; init; }
+    public DbSet<UserAnswer> UserAnswers { get; init; }
 }

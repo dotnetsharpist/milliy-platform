@@ -12,7 +12,14 @@ public class UnitOfWork(MilliyMockDbContext dbContext) : IUnitOfWork
     }
 
     public IRepository<User> Users { get; } = new Repository<User>(dbContext);
-    
+    public IRepository<BotUser> BotUsers { get; } = new Repository<BotUser>(dbContext);
+    public IRepository<Test> Tests { get; } = new Repository<Test>(dbContext);
+    public IRepository<QuestionGroup> QuestionGroups { get; } = new Repository<QuestionGroup>(dbContext);
+    public IRepository<Question> Questions { get; } = new Repository<Question>(dbContext);
+    public IRepository<Option> Options { get; } = new Repository<Option>(dbContext);
+    public IRepository<UserTestAttempt> UserTestAttempts { get; } = new Repository<UserTestAttempt>(dbContext);
+    public IRepository<UserAnswer> UserAnswer { get; } = new Repository<UserAnswer>(dbContext);
+
     public async Task<bool> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync() >= 0;

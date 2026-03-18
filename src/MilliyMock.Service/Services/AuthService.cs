@@ -25,8 +25,8 @@ public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapp
         if (HttpContextHelper.UserId != null)
             throw new MilliyMockException(400, "Bad request.");
         
-        var existingUser = await unitOfWork.Users.SelectAsync(u => u.Username == dto.Username);
-        if (existingUser != null) throw new MilliyMockException(409, "User with this username already exists!");
+        var existingUser = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
+        if (existingUser != null) throw new MilliyMockException(409, "User with this email already exists!");
 
         var mappedUser = mapper.Map<User>(dto);
         mappedUser.PasswordHash = PasswordHelper.Hash(dto.Password);
@@ -52,7 +52,7 @@ public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapp
     
     public async ValueTask<LoginResultDto> Login(LoginDto dto)
     {
-        var user = await unitOfWork.Users.SelectAsync(u => u.Username == dto.Username);
+        var user = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
         if (user == null) throw new MilliyMockException(404, "User not found");
 
         if (!PasswordHelper.Verify(dto.Password, user.PasswordHash))

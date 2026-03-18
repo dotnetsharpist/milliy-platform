@@ -14,10 +14,10 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
     public async ValueTask<bool> Add(UserCreationDto dto)
     {
         var exists = await unitOfWork.Users
-            .SelectAsync(u => u.Username == dto.Username);
+            .SelectAsync(u => u.Email == dto.Email);
 
         if (exists == null)
-            throw new MilliyMockException(409, "Username already exists");
+            throw new MilliyMockException(409, "User with ts Email already exists");
 
         var user = mapper.Map<User>(dto);
 
