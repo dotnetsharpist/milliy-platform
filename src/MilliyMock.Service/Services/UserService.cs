@@ -11,7 +11,7 @@ namespace MilliyMock.Service.Services;
 
 public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
 {
-    public async ValueTask<bool> Add(UserCreationDto dto)
+    public async ValueTask<bool> Add(CreateUserDto dto)
     {
         var exists = await unitOfWork.Users
             .SelectAsync(u => u.Email == dto.Email);
@@ -27,7 +27,7 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
         return true;
     }
 
-    public async ValueTask<bool> Update(long id, UserUpdateDto dto)
+    public async ValueTask<bool> Update(long id, UpdateUserDto dto)
     {
         var user = await unitOfWork.Users
             .SelectAsync(u => u.Id == id);

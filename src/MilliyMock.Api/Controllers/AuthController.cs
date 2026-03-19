@@ -22,7 +22,7 @@ public class AuthController(IAuthService authService) : BaseController
     
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> RegisterAsync(UserCreationDto dto)
+    public async Task<IActionResult> RegisterAsync(CreateUserDto dto)
         => Ok(new Response
         {
             Code = 200,

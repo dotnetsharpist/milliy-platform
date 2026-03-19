@@ -1,6 +1,6 @@
 namespace MilliyMock.Service.Dtos.Users;
 
-public class UserUpdateDto
+public class UpdateUserDto
 {
     public required string FullName { get; set; }
     public required string Email { get; set; }

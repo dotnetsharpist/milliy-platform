@@ -20,7 +20,7 @@ public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapp
 {
     private readonly IConfiguration _configuration = configuration.GetSection("Jwt");
 
-    public async ValueTask<string> Register(UserCreationDto dto)
+    public async ValueTask<string> Register(CreateUserDto dto)
     {
         if (HttpContextHelper.UserId != null)
             throw new MilliyMockException(400, "Bad request.");
