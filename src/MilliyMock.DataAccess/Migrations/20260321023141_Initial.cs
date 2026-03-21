@@ -33,24 +33,6 @@ namespace MilliyMock.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionGroups",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "text", nullable: true),
-                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionGroups", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Tests",
                 columns: table => new
                 {
@@ -98,19 +80,13 @@ namespace MilliyMock.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Questions",
+                name: "QuestionGroups",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Text = table.Column<string>(type: "text", nullable: true),
-                    ImagePath = table.Column<string>(type: "text", nullable: true),
-                    Order = table.Column<int>(type: "integer", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
                     TestId = table.Column<long>(type: "bigint", nullable: false),
-                    CorrectAnswer = table.Column<string>(type: "text", nullable: true),
-                    QuestionGroupId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -119,14 +95,9 @@ namespace MilliyMock.DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.PrimaryKey("PK_QuestionGroups", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_QuestionGroups_QuestionGroupId",
-                        column: x => x.QuestionGroupId,
-                        principalTable: "QuestionGroups",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Questions_Tests_TestId",
+                        name: "FK_QuestionGroups_Tests_TestId",
                         column: x => x.TestId,
                         principalTable: "Tests",
                         principalColumn: "Id",
@@ -163,6 +134,42 @@ namespace MilliyMock.DataAccess.Migrations
                         name: "FK_UserTestAttempts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Text = table.Column<string>(type: "text", nullable: true),
+                    ImagePath = table.Column<string>(type: "text", nullable: true),
+                    Order = table.Column<int>(type: "integer", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    TestId = table.Column<long>(type: "bigint", nullable: false),
+                    CorrectAnswer = table.Column<string>(type: "text", nullable: true),
+                    QuestionGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_QuestionGroups_QuestionGroupId",
+                        column: x => x.QuestionGroupId,
+                        principalTable: "QuestionGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Questions_Tests_TestId",
+                        column: x => x.TestId,
+                        principalTable: "Tests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -240,7 +247,7 @@ namespace MilliyMock.DataAccess.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "BotUserId", "CreatedAt", "CreatedBy", "Email", "EmailConfirmed", "FullName", "GoogleId", "IsDeleted", "PasswordHash", "Role", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1L, null, new DateTime(2026, 3, 18, 15, 2, 44, 572, DateTimeKind.Utc).AddTicks(8350), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$08oUunOesiOqXbNrLOG9XeOtM9mZB/JVKmsnDzyn.vZegWVguireC", 1, null, null });
+                values: new object[] { 1L, null, new DateTime(2026, 3, 21, 7, 31, 41, 539, DateTimeKind.Utc).AddTicks(3980), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$dznwEo4Q5XUE0loo9odyRu5Xu4MxH6GU21Rw1vSWiPJlBiO0aAP5m", 1, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionGroupId",
@@ -251,6 +258,11 @@ namespace MilliyMock.DataAccess.Migrations
                 name: "IX_Options_QuestionId",
                 table: "Options",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionGroups_TestId",
+                table: "QuestionGroups",
+                column: "TestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuestionGroupId",
@@ -321,10 +333,10 @@ namespace MilliyMock.DataAccess.Migrations
                 name: "QuestionGroups");
 
             migrationBuilder.DropTable(
-                name: "Tests");
+                name: "BotUsers");
 
             migrationBuilder.DropTable(
-                name: "BotUsers");
+                name: "Tests");
         }
     }
 }

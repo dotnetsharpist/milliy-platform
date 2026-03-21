@@ -4,4 +4,6 @@ public class TestResultDto
 {
     public long Id { get; set; }
     public string Title { get; set; } = null!;
+    public int QuestionCount { get; set; }
+    public int AttemptCount { get; set; }
 }

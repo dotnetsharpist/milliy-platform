@@ -178,6 +178,9 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<long>("TestId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
@@ -188,6 +191,8 @@ namespace MilliyMock.DataAccess.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TestId");
 
                     b.ToTable("QuestionGroups");
                 });
@@ -283,13 +288,13 @@ namespace MilliyMock.DataAccess.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 3, 18, 15, 2, 44, 572, DateTimeKind.Utc).AddTicks(8350),
+                            CreatedAt = new DateTime(2026, 3, 21, 7, 31, 41, 539, DateTimeKind.Utc).AddTicks(3980),
                             CreatedBy = 1L,
                             Email = "ysharpist",
                             EmailConfirmed = false,
                             FullName = "Abdurrohman",
                             IsDeleted = false,
-                            PasswordHash = "$2a$11$08oUunOesiOqXbNrLOG9XeOtM9mZB/JVKmsnDzyn.vZegWVguireC",
+                            PasswordHash = "$2a$11$dznwEo4Q5XUE0loo9odyRu5Xu4MxH6GU21Rw1vSWiPJlBiO0aAP5m",
                             Role = 1
                         });
                 });
@@ -415,6 +420,17 @@ namespace MilliyMock.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestionGroup");
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
+                {
+                    b.HasOne("MilliyMock.Domain.Entities.Test", "Test")
+                        .WithMany()
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Test");
                 });

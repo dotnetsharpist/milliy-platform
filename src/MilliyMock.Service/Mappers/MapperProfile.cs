@@ -41,7 +41,7 @@ public class MapperProfile : Profile
         CreateMap<UserTestAttempt, UserTestAttemptResultDto>().ReverseMap();
         
         // UserAnswer
-        CreateMap<UserAnswer, CreateUserAnswer>().ReverseMap();
+        CreateMap<UserAnswer, CreateUserAnswerDto>().ReverseMap();
         CreateMap<UserAnswer, UserAnswerResultDto>().ReverseMap();
     }
 }

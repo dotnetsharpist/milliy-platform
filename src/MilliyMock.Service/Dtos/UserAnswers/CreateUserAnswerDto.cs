@@ -1,6 +1,6 @@
 namespace MilliyMock.Service.Dtos.UserAnswers;
 
-public class CreateUserAnswer
+public class CreateUserAnswerDto
 {
     public long UserTestAttemptId { get; set; }
     public long QuestionId { get; set; }

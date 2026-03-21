@@ -20,34 +20,9 @@ public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapp
 {
     private readonly IConfiguration _configuration = configuration.GetSection("Jwt");
 
-    public async ValueTask<string> Register(CreateUserDto dto)
+    public ValueTask<string> Register(CreateUserDto dto)
     {
-        if (HttpContextHelper.UserId != null)
-            throw new MilliyMockException(400, "Bad request.");
-        
-        var existingUser = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
-        if (existingUser != null) throw new MilliyMockException(409, "User with this email already exists!");
-
-        var mappedUser = mapper.Map<User>(dto);
-        mappedUser.PasswordHash = PasswordHelper.Hash(dto.Password);
-        await unitOfWork.Users.InsertAsync(mappedUser);
-        if (!await unitOfWork.Users.SaveAsync())
-            throw new MilliyMockException();
-
-        var otp = OtpGenerator.GenerateOtp();
-        var otpModel = new TelegramOtpEntry()
-        {
-            UserId = mappedUser.Id,
-            Code = otp,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        memoryCache.Set(
-            $"otp_{otp}",
-            otpModel,
-            TimeSpan.FromMinutes(10)
-        );        //await emailService.SendAsync(emailMessage);
-        return otp;
+        throw new MilliyMockException();
     }
     
     public async ValueTask<LoginResultDto> Login(LoginDto dto)

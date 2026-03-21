@@ -17,5 +17,5 @@ public class UserTestAttemptResultDto
 
     public int TotalScore { get; set; }
 
-    public ICollection<UserAnswerResultDto> Answers { get; set; } = new List<UserAnswerResultDto>();
+    public List<UserAnswerResultDto> UserAnswers { get; set; } = [];
 }

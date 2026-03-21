@@ -84,7 +84,7 @@ namespace MilliyMock.DataAccess.Repositories;
         /// Selects all elements from table that matches condition and include relations
         /// </summary>
         /// <returns></returns>
-        public IQueryable<TEntity> SelectAll(Expression<Func<TEntity, bool>> expression = null, string[] includes = null)
+        public IQueryable<TEntity> SelectAll(Expression<Func<TEntity, bool>>? expression = null, string[]? includes = null)
         {
             IQueryable<TEntity> query = expression is null ? this.dbSet : this.dbSet.Where(expression);
 

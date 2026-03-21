@@ -24,12 +24,6 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Content Update="appsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-    
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="publish\publish\publish\publish\publish\web.config" />
       <_ContentIncludedByDefault Remove="publish\publish\publish\publish\web.config" />
       <_ContentIncludedByDefault Remove="publish\publish\publish\web.config" />
