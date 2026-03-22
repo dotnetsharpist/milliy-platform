@@ -8,10 +8,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "5000:5000"
+      - "5090:5090"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://0.0.0.0:5000
-      ConnectionStrings__DefaultConnection: Host=host.docker.internal;Port=5432;Database=MilliyMock;Username=abdurahmon;Password=muslim571;
+      ASPNETCORE_URLS: http://0.0.0.0:5090
     extra_hosts:
       - "host.docker.internal:host-gateway"
