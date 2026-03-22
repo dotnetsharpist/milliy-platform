@@ -59,5 +59,9 @@
     <ItemGroup>
       <None Remove="Properties\launchSettings.json" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="wwwroot\images\" />
+    </ItemGroup>
 
 </Project>
