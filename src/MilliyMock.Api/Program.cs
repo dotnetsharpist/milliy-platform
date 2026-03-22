@@ -21,11 +21,6 @@ services.ConfigureSwagger();
 services.AddMemoryCache();
 services.AddHttpClient();
 services.AddHttpContextAccessor();
-HttpContextHelper.Accessor =
-#pragma warning disable ASP0000
-    builder.Services.BuildServiceProvider()
-#pragma warning restore ASP0000
-        .GetRequiredService<IHttpContextAccessor>();
 
 var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
 
@@ -83,6 +78,7 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+app.InitAccessor();
 app.MapControllers();
 app.UseStaticFiles();
 app.Run();

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
 namespace MilliyMock.Shared.Helpers;
@@ -14,7 +15,7 @@ public static class HttpContextHelper
         get
         {
             if (long.TryParse(
-                    HttpContext?.User?.FindFirst("id")?.Value,
+                    HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                     out var userId))
             {
                 return userId;
@@ -25,7 +26,7 @@ public static class HttpContextHelper
     }
 
     public static string? UserRole =>
-        HttpContext?.User?.FindFirst("role")?.Value;
+        HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
 
     // ===================== NETWORK =====================
     public static string IpAddress

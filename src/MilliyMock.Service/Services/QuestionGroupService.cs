@@ -4,6 +4,7 @@ using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Interfaces;
+using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
@@ -12,6 +13,7 @@ public class QuestionGroupService(IUnitOfWork unitOfWork, IMapper mapper) : IQue
     public async Task<bool> CreateAsync(CreateQuestionGroupDto dto)
     {
         var questionGroup = mapper.Map<QuestionGroup>(dto);
+        questionGroup.CreatedBy = HttpContextHelper.UserId;
         return await unitOfWork.QuestionGroups.SaveAsync();
     }
 

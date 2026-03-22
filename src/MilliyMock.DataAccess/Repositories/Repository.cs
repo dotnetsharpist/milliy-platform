@@ -84,28 +84,26 @@ namespace MilliyMock.DataAccess.Repositories;
         /// Selects all elements from table that matches condition and include relations
         /// </summary>
         /// <returns></returns>
-        public IQueryable<TEntity> SelectAll(Expression<Func<TEntity, bool>>? expression = null, string[]? includes = null)
+        public IQueryable<TEntity> SelectAll()
         {
-            IQueryable<TEntity> query = expression is null ? this.dbSet : this.dbSet.Where(expression);
-
-            if (includes is not null)
-            {
-                foreach (string include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-
+            return dbSet;
+        }
+        
+        public IQueryable<TEntity> SelectAll(
+            Expression<Func<TEntity, bool>>? expression)
+        {
+            IQueryable<TEntity> query = expression is null ? dbSet : dbSet.Where(expression);
+            
             return query;
         }
-
+        
         /// <summary>
         /// selects element from a table specified with expression and can includes relations
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public async ValueTask<TEntity?> SelectAsync(Expression<Func<TEntity, bool>> expression, string[] includes = null)
-            => await this.SelectAll(expression, includes).FirstOrDefaultAsync(t => !t.IsDeleted);
+        public async ValueTask<TEntity?> SelectAsync(Expression<Func<TEntity, bool>> expression)
+            => await this.SelectAll(expression).FirstOrDefaultAsync(t => !t.IsDeleted);
 
         /// <summary>
         /// Updates entity and keep track of it until change saved

@@ -43,8 +43,8 @@ public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapp
     {
         var identityClaims = new[]
         {
-            new Claim("Id", user.Id.ToString()),
-            new Claim("FullName", user.FullName),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.FullName),
             new Claim("Purpose", "accessToken"),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };

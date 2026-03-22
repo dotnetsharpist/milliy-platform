@@ -5,6 +5,7 @@ using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.Questions;
 using MilliyMock.Service.Interfaces;
+using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
@@ -24,6 +25,7 @@ public class QuestionService(IUnitOfWork unitOfWork, IFileService fileService, I
             }
 
             var question = mapper.Map<Question>(dto);
+            question.CreatedBy = HttpContextHelper.UserId;
             if (dto.Image is not null)
             {
                 var imagePath = await fileService.UploadImage(dto.Image);
