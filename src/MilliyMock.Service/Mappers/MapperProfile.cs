@@ -23,18 +23,22 @@ public class MapperProfile : Profile
         // Test
         CreateMap<Test, CreateTestDto>().ReverseMap();
         CreateMap<Test, TestResultDto>().ReverseMap();
+        CreateMap<Test, FullTestResultDto>().ReverseMap();
         
         // QuestionGroup
         CreateMap<QuestionGroup, CreateQuestionGroupDto>().ReverseMap();
         CreateMap<QuestionGroup, QuestionGroupResultDto>().ReverseMap();
+        CreateMap<QuestionGroup, QuestionGroupAttemptDto>().ReverseMap();
         
         // Question
         CreateMap<Question, CreateQuestionDto>().ForMember(dest => dest.Image, opt => opt.Ignore());
         CreateMap<Question, QuestionResultDto>().ReverseMap();
+        CreateMap<Question, QuestionAttemptDto>().ReverseMap();
         
         // Option
         CreateMap<Option, CreateOptionDto>().ReverseMap();
         CreateMap<Option, OptionResultDto>().ReverseMap();
+        CreateMap<Option, OptionAttemptDto>().ReverseMap();
         
         // UserTestAttempt
         CreateMap<UserTestAttempt, CreateUserTestAttemptDto>().ReverseMap();

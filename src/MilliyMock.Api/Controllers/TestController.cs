@@ -24,4 +24,12 @@ public class TestController(ITestService testService) : BaseController
         {
             Data = await testService.GetAllAsync()
         });
+    
+    [Authorize]
+    [HttpGet("{testId:long}")]
+    public async Task<IActionResult> GetTheWholeTest(long testId)
+        => Ok(new Response
+        {
+            Data = await testService.GetFullTest(testId)
+        });
 }

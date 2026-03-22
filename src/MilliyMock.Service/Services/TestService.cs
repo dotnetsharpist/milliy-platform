@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Tests;
 using MilliyMock.Service.Interfaces;
 using MilliyMock.Shared.Helpers;
@@ -36,5 +37,25 @@ public class TestService(IUnitOfWork unitOfWork, IMapper mapper) : ITestService
                     .Count(a => a.TestId == test.Id)
             })
             .ToListAsync();
+    }
+
+    public async Task<FullTestResultDto> GetFullTest(long testId)
+    {
+        var test = await unitOfWork.Tests.
+            SelectAll(t => t.Id == testId)
+            .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Options)
+            .FirstOrDefaultAsync();
+
+        var groupedQuestions = await unitOfWork.QuestionGroups
+            .SelectAll(qg => qg.TestId == testId)
+            .Include(qg => qg.Questions)
+            .Include(qg => qg.Options)
+            .ToListAsync();
+        
+        // mapping
+        var fullTest = mapper.Map<FullTestResultDto>(test);
+        fullTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
+
+        return fullTest;
     }
 }

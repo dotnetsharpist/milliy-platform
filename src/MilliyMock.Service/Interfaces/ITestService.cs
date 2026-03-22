@@ -6,4 +6,5 @@ public interface ITestService
 {
     Task<bool> CreateAsync(CreateTestDto dto);
     Task<List<TestResultDto>> GetAllAsync();
+    Task<FullTestResultDto> GetFullTest(long testId);
 }
