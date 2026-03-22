@@ -70,7 +70,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
-
 EnvironmentHelper.WebRootPath = Path.GetFullPath("wwwroot");
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
