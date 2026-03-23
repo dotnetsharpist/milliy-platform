@@ -31,9 +31,10 @@ public class MapperProfile : Profile
         CreateMap<QuestionGroup, QuestionGroupAttemptDto>().ReverseMap();
         
         // Question
-        CreateMap<Question, CreateQuestionDto>().ForMember(dest => dest.Image, opt => opt.Ignore());
+        CreateMap<Question, CreateQuestionDto>().ForMember(dest => dest.Image, opt => opt.Ignore()).ReverseMap();
         CreateMap<Question, QuestionResultDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptDto>().ReverseMap();
+        CreateMap<Question, QuestionAttemptForQuestionGroupDto>().ReverseMap();
         
         // Option
         CreateMap<Option, CreateOptionDto>().ReverseMap();

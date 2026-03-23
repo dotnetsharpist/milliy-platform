@@ -182,7 +182,7 @@ namespace MilliyMock.DataAccess.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Text = table.Column<string>(type: "text", nullable: false),
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
-                    QuestionId = table.Column<long>(type: "bigint", nullable: false),
+                    QuestionId = table.Column<long>(type: "bigint", nullable: true),
                     QuestionGroupId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -202,8 +202,7 @@ namespace MilliyMock.DataAccess.Migrations
                         name: "FK_Options_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -247,7 +246,7 @@ namespace MilliyMock.DataAccess.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "BotUserId", "CreatedAt", "CreatedBy", "Email", "EmailConfirmed", "FullName", "GoogleId", "IsDeleted", "PasswordHash", "Role", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1L, null, new DateTime(2026, 3, 21, 7, 31, 41, 539, DateTimeKind.Utc).AddTicks(3980), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$dznwEo4Q5XUE0loo9odyRu5Xu4MxH6GU21Rw1vSWiPJlBiO0aAP5m", 1, null, null });
+                values: new object[] { 1L, null, new DateTime(2026, 3, 24, 1, 43, 44, 857, DateTimeKind.Utc).AddTicks(400), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$n21Hh//CQzEyRdiCIsstSu0c4V1axNlo9qDWjyKXy40Dwej1hmV42", 1, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionGroupId",

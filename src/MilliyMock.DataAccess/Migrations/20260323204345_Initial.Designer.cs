@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MilliyMock.DataAccess.Migrations
 {
     [DbContext(typeof(MilliyMockDbContext))]
-    [Migration("20260321023141_Initial")]
+    [Migration("20260323204345_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<long?>("QuestionGroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("QuestionId")
+                    b.Property<long?>("QuestionId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
@@ -291,13 +291,13 @@ namespace MilliyMock.DataAccess.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 3, 21, 7, 31, 41, 539, DateTimeKind.Utc).AddTicks(3980),
+                            CreatedAt = new DateTime(2026, 3, 24, 1, 43, 44, 857, DateTimeKind.Utc).AddTicks(400),
                             CreatedBy = 1L,
                             Email = "ysharpist",
                             EmailConfirmed = false,
                             FullName = "Abdurrohman",
                             IsDeleted = false,
-                            PasswordHash = "$2a$11$dznwEo4Q5XUE0loo9odyRu5Xu4MxH6GU21Rw1vSWiPJlBiO0aAP5m",
+                            PasswordHash = "$2a$11$n21Hh//CQzEyRdiCIsstSu0c4V1axNlo9qDWjyKXy40Dwej1hmV42",
                             Role = 1
                         });
                 });
@@ -397,17 +397,17 @@ namespace MilliyMock.DataAccess.Migrations
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Option", b =>
                 {
-                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", null)
+                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", "QuestionGroup")
                         .WithMany("Options")
                         .HasForeignKey("QuestionGroupId");
 
                     b.HasOne("MilliyMock.Domain.Entities.Question", "Question")
                         .WithMany("Options")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("QuestionId");
 
                     b.Navigation("Question");
+
+                    b.Navigation("QuestionGroup");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Question", b =>
@@ -460,7 +460,7 @@ namespace MilliyMock.DataAccess.Migrations
                         .HasForeignKey("SelectedOptionId");
 
                     b.HasOne("MilliyMock.Domain.Entities.UserTestAttempt", "UserTestAttempt")
-                        .WithMany("Answers")
+                        .WithMany("UserAnswers")
                         .HasForeignKey("UserTestAttemptId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -510,7 +510,7 @@ namespace MilliyMock.DataAccess.Migrations
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.UserTestAttempt", b =>
                 {
-                    b.Navigation("Answers");
+                    b.Navigation("UserAnswers");
                 });
 #pragma warning restore 612, 618
         }

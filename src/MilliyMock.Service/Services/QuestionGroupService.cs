@@ -14,13 +14,15 @@ public class QuestionGroupService(IUnitOfWork unitOfWork, IMapper mapper) : IQue
     {
         var questionGroup = mapper.Map<QuestionGroup>(dto);
         questionGroup.CreatedBy = HttpContextHelper.UserId;
+        await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
         return await unitOfWork.QuestionGroups.SaveAsync();
     }
 
     public async Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId)
     {
+        var questiongroupsblyat = await unitOfWork.QuestionGroups.SelectAll().ToListAsync();
         var questionGroups = await unitOfWork.QuestionGroups
-            .SelectAll(qg => qg.Id == testId)
+            .SelectAll(qg => qg.TestId == testId)
             .Include(g => g.Questions)
             .Include(g => g.Options)
             .ToListAsync();
