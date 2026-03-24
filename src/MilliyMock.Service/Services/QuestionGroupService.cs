@@ -20,7 +20,6 @@ public class QuestionGroupService(IUnitOfWork unitOfWork, IMapper mapper) : IQue
 
     public async Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId)
     {
-        var questiongroupsblyat = await unitOfWork.QuestionGroups.SelectAll().ToListAsync();
         var questionGroups = await unitOfWork.QuestionGroups
             .SelectAll(qg => qg.TestId == testId)
             .Include(g => g.Questions)
