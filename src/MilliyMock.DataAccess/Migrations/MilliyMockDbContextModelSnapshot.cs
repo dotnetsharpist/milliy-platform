@@ -134,8 +134,8 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<long?>("QuestionGroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("numeric");
 
                     b.Property<long>("TestId")
                         .HasColumnType("bigint");
@@ -288,13 +288,13 @@ namespace MilliyMock.DataAccess.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 3, 24, 1, 43, 44, 857, DateTimeKind.Utc).AddTicks(400),
+                            CreatedAt = new DateTime(2026, 3, 24, 23, 5, 36, 459, DateTimeKind.Utc).AddTicks(7350),
                             CreatedBy = 1L,
                             Email = "ysharpist",
                             EmailConfirmed = false,
                             FullName = "Abdurrohman",
                             IsDeleted = false,
-                            PasswordHash = "$2a$11$n21Hh//CQzEyRdiCIsstSu0c4V1axNlo9qDWjyKXy40Dwej1hmV42",
+                            PasswordHash = "$2a$11$xRA9ByZiowTpAoFBSRLLuOoWJpNI/XptZeLKcB2hqJYxiU822iCnO",
                             Role = 1
                         });
                 });
@@ -371,8 +371,8 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<long>("TestId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("TotalScore")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("TotalScore")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

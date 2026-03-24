@@ -10,7 +10,7 @@ public class UserTestAttempt : Auditable
     public Test Test { get; set; } = null!;
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
-    public int TotalScore { get; set; }
+    public decimal TotalScore { get; set; }
     
     public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 }

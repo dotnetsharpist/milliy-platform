@@ -8,7 +8,7 @@ public class Question : Auditable
     public string? Text { get; set; }
     public string? ImagePath { get; set; }
     public int Order { get; set; }
-    public int Score { get; set; }
+    public decimal Score { get; set; }
     public QuestionType Type { get; set; }
     public long TestId { get; set; }
     public Test Test { get; set; }

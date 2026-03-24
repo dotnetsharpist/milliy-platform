@@ -15,7 +15,7 @@ public class UserTestAttemptResultDto
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
 
-    public int TotalScore { get; set; }
+    public decimal TotalScore { get; set; }
 
     public List<UserAnswerResultDto> UserAnswers { get; set; } = [];
 }

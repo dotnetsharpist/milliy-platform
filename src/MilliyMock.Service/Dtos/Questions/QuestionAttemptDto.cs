@@ -9,7 +9,7 @@ public class QuestionAttemptDto
     public string? Text { get; set; }
     public string? ImagePath { get; set; }
     public int Order { get; set; }
-    public int Score { get; set; }
+    public decimal Score { get; set; }
     public QuestionType Type { get; set; }
     public long? QuestionGroupId { get; set; }
     public List<OptionAttemptDto> Options { get; set; } = [];

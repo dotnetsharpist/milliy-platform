@@ -114,7 +114,7 @@ namespace MilliyMock.DataAccess.Migrations
                     TestId = table.Column<long>(type: "bigint", nullable: false),
                     StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FinishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    TotalScore = table.Column<int>(type: "integer", nullable: false),
+                    TotalScore = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -147,7 +147,7 @@ namespace MilliyMock.DataAccess.Migrations
                     Text = table.Column<string>(type: "text", nullable: true),
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
+                    Score = table.Column<decimal>(type: "numeric", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     TestId = table.Column<long>(type: "bigint", nullable: false),
                     CorrectAnswer = table.Column<string>(type: "text", nullable: true),
@@ -246,7 +246,7 @@ namespace MilliyMock.DataAccess.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "BotUserId", "CreatedAt", "CreatedBy", "Email", "EmailConfirmed", "FullName", "GoogleId", "IsDeleted", "PasswordHash", "Role", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1L, null, new DateTime(2026, 3, 24, 1, 43, 44, 857, DateTimeKind.Utc).AddTicks(400), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$n21Hh//CQzEyRdiCIsstSu0c4V1axNlo9qDWjyKXy40Dwej1hmV42", 1, null, null });
+                values: new object[] { 1L, null, new DateTime(2026, 3, 24, 23, 5, 36, 459, DateTimeKind.Utc).AddTicks(7350), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$xRA9ByZiowTpAoFBSRLLuOoWJpNI/XptZeLKcB2hqJYxiU822iCnO", 1, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionGroupId",
