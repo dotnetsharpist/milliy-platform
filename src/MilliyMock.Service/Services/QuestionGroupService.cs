@@ -1,21 +1,34 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Interfaces;
 using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
-public class QuestionGroupService(IUnitOfWork unitOfWork, IMapper mapper) : IQuestionGroupService
+public class QuestionGroupService(
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    ILogger<QuestionGroupService> logger) : IQuestionGroupService
 {
     public async Task<bool> CreateAsync(CreateQuestionGroupDto dto)
     {
-        var questionGroup = mapper.Map<QuestionGroup>(dto);
-        questionGroup.CreatedBy = HttpContextHelper.UserId;
-        await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
-        return await unitOfWork.QuestionGroups.SaveAsync();
+        try
+        {
+            var questionGroup = mapper.Map<QuestionGroup>(dto);
+            questionGroup.CreatedBy = HttpContextHelper.UserId;
+            await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
+            return await unitOfWork.QuestionGroups.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating QuestionGroup {text}", dto.Title);
+            throw new MilliyMockException();
+        }
     }
 
     public async Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId)
@@ -25,6 +38,7 @@ public class QuestionGroupService(IUnitOfWork unitOfWork, IMapper mapper) : IQue
             .Include(g => g.Questions)
             .Include(g => g.Options)
             .ToListAsync();
+        
         return mapper.Map<List<QuestionGroupResultDto>>(questionGroups);
     }
 }

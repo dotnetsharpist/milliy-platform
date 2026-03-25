@@ -4,10 +4,11 @@ using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.Email;
 using MilliyMock.Service.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace MilliyMock.Service.Services;
 
-public class EmailService(IConfiguration configuration): IEmailService
+public class EmailService(IConfiguration configuration, ILogger<EmailService> logger): IEmailService
 {
     private readonly string Email = configuration["Email:Sender"];
     private readonly string Host = configuration["Email:BaseURL"];

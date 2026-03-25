@@ -1,7 +1,9 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Tests;
 using MilliyMock.Service.Interfaces;
@@ -9,7 +11,10 @@ using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
-public class TestService(IUnitOfWork unitOfWork, IMapper mapper) : ITestService
+public class TestService(
+    IUnitOfWork unitOfWork, 
+    IMapper mapper,
+    ILogger<TestService> logger) : ITestService
 {
     public async Task<bool> CreateAsync(CreateTestDto dto)
     {
@@ -41,21 +46,28 @@ public class TestService(IUnitOfWork unitOfWork, IMapper mapper) : ITestService
 
     public async Task<FullTestResultDto> GetFullTest(long testId)
     {
-        var test = await unitOfWork.Tests.
-            SelectAll(t => t.Id == testId)
-            .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Options)
-            .FirstOrDefaultAsync();
+        try
+        {
+            var test = await unitOfWork.Tests.SelectAll(t => t.Id == testId)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Options)
+                .FirstOrDefaultAsync();
 
-        var groupedQuestions = await unitOfWork.QuestionGroups
-            .SelectAll(qg => qg.TestId == testId)
-            .Include(qg => qg.Questions)
-            .Include(qg => qg.Options)
-            .ToListAsync();
-        
-        // mapping
-        var fullTest = mapper.Map<FullTestResultDto>(test);
-        fullTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
+            var groupedQuestions = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.TestId == testId)
+                .Include(qg => qg.Questions)
+                .Include(qg => qg.Options)
+                .ToListAsync();
 
-        return fullTest;
+            // mapping
+            var fullTest = mapper.Map<FullTestResultDto>(test);
+            fullTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
+
+            return fullTest;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting full test with id: {id}", testId);
+            throw new MilliyMockException();
+        }
     }
 }

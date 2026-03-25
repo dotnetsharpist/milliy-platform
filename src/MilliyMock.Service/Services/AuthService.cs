@@ -12,11 +12,15 @@ using MilliyMock.Service.Models;
 using MilliyMock.Shared.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MilliyMock.Service.Services;
 
-public class AuthService(IUnitOfWork unitOfWork, IMemoryCache memoryCache, IMapper mapper, IConfiguration configuration) : IAuthService
+public class AuthService(
+    IUnitOfWork unitOfWork, 
+    ILogger<AuthService> logger,
+    IConfiguration configuration) : IAuthService
 {
     private readonly IConfiguration _configuration = configuration.GetSection("Jwt");
 

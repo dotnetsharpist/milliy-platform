@@ -7,9 +7,11 @@ using MilliyMock.Extensions;
 using MilliyMock.Middlewares;
 using MilliyMock.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+builder.ConfigureLogger();
 builder.ConfigureJwtAuth();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -61,6 +63,12 @@ builder.ConfigureDataAccess();
 builder.ConfigureServices();
 var app = builder.Build();
 
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate =
+        "Handled {RequestPath} with {StatusCode} in {Elapsed:0.0000} ms";
+});
+
 app.ApplyMigrations();
 
 // Configure the HTTP request pipeline.
@@ -80,4 +88,17 @@ app.UseAuthorization();
 app.InitAccessor();
 app.MapControllers();
 app.UseStaticFiles();
-app.Run();
+
+try
+{
+    Log.Information("Starting application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

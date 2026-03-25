@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Exceptions;
@@ -9,7 +10,11 @@ using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
-public class QuestionService(IUnitOfWork unitOfWork, IFileService fileService, IMapper mapper) : IQuestionService
+public class QuestionService(
+    IUnitOfWork unitOfWork, 
+    IFileService fileService,
+    IMapper mapper,
+    ILogger<QuestionService> logger) : IQuestionService
 {
     public async Task<bool> CreateAsync(CreateQuestionDto dto)
     {
@@ -37,6 +42,7 @@ public class QuestionService(IUnitOfWork unitOfWork, IFileService fileService, I
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error creating question {text}", dto.Text);
             throw new MilliyMockException();
         }
     }
