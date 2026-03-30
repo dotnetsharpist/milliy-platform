@@ -35,7 +35,7 @@ public class AuthService(
         if (user == null) throw new MilliyMockException(404, "User not found");
 
         if (!PasswordHelper.Verify(dto.Password, user.PasswordHash))
-            throw new MilliyMockException(409, "Password or email is incorrect");
+            throw new MilliyMockException(400, "Password or email is incorrect");
 
         return new LoginResultDto
         {

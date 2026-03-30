@@ -12,6 +12,7 @@ namespace MilliyMock.Service.Services;
 
 public class QuestionGroupService(
     IUnitOfWork unitOfWork,
+    IFileService fileService,
     IMapper mapper,
     ILogger<QuestionGroupService> logger) : IQuestionGroupService
 {
@@ -21,6 +22,13 @@ public class QuestionGroupService(
         {
             var questionGroup = mapper.Map<QuestionGroup>(dto);
             questionGroup.CreatedBy = HttpContextHelper.UserId;
+            
+            if (dto.Image is not null)
+            {
+                var imagePath = await fileService.UploadImage(dto.Image);
+                questionGroup.ImagePath = imagePath;
+            }
+
             await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
             return await unitOfWork.QuestionGroups.SaveAsync();
         }

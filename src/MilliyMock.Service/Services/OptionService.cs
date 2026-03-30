@@ -17,6 +17,9 @@ public class OptionService(IUnitOfWork unitOfWork,
     {
         try
         {
+            if ((dto.QuestionId == null && dto.QuestionGroupId == null) || (dto.QuestionId != null && dto.QuestionGroupId != null)) 
+                throw new Exception("Option must belong to either Question OR QuestionGroup");
+
             logger.LogInformation("Creating option {text}", dto.Text);
             if (dto.QuestionId == null && dto.QuestionGroupId == null)
                 throw new MilliyMockException(409, "Both ids cannot be null");

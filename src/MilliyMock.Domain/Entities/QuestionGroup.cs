@@ -5,6 +5,7 @@ namespace MilliyMock.Domain.Entities;
 public class QuestionGroup : Auditable
 {
     public string? Title { get; set; }
+    public string? ImagePath { get; set; }
     public long TestId { get; set; }
     public Test Test { get; set; }
     

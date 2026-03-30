@@ -24,4 +24,12 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         {
             Data = await service.GetByUserId()
         });
+
+    [HttpPost("submit")]
+    [Authorize]
+    public async Task<IActionResult> SubmitAsync()
+        => Ok(new Response
+        {
+            Data = await service.SubmitTest()
+        });
 }
