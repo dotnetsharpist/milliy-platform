@@ -52,4 +52,38 @@ public class QuestionService(
         var questions = await unitOfWork.Questions.SelectAll(q => q.TestId == testId).ToListAsync();
         return mapper.Map<List<QuestionResultDto>>(questions);
     }
+
+    public async Task<bool> DeleteAsync(long questionId)
+    {
+        try
+        {
+            logger.LogInformation("Deleting question with id {questionId}", questionId);
+            var question = await unitOfWork.Questions.SelectAsync(q => q.Id == questionId);
+            if (question is null) throw new MilliyMockException(404, "Question not found");
+            
+            // delete image if exists
+            if (question.ImagePath is not null)
+            {
+                var deleteImage = fileService.Delete(question.ImagePath);
+                if (deleteImage is false)
+                {
+                    logger.LogError("Failed to delete image at path {imagePath} for question {questionId}",
+                        question.ImagePath, questionId);
+                    //throw new MilliyMockException(500, "Failed to delete question image");
+                }
+            }
+
+            await unitOfWork.Questions.DeleteAsync(q => q.Id == questionId);
+            return await unitOfWork.Questions.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting question with id {questionId}", questionId);
+            throw new MilliyMockException();
+        }
+    }
 }

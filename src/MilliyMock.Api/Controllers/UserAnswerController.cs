@@ -10,10 +10,19 @@ namespace MilliyMock.Controllers;
 public class UserAnswerController(IUserAnswerService answerService) : BaseController
 {
     [HttpPost]
-    [Authorize(Roles = "SuperAdmin,Admin")]
+    [Authorize]
     public async Task<IActionResult> CreateAsync(CreateUserAnswerDto dto)
         => Ok(new Response
         {
             Data = await answerService.CreateAsync(dto)
         });
+    
+    [HttpPut]
+    [Authorize]
+    public async Task<IActionResult> UpdateAsync(UpdateUserAnswerDto dto)
+        => Ok(new Response
+        {
+            Data = await answerService.UpdateAsync(dto)
+        });
+
 }

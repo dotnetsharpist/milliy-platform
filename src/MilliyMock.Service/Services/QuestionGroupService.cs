@@ -49,4 +49,37 @@ public class QuestionGroupService(
         
         return mapper.Map<List<QuestionGroupResultDto>>(questionGroups);
     }
+
+    public async Task<bool> DeleteAsync(long questionGroupId)
+    {
+        try
+        {
+            logger.LogInformation("Deleting question group with id {questionGroupId}", questionGroupId);
+            var questionGroup = await unitOfWork.QuestionGroups.SelectAsync(qg => qg.Id == questionGroupId);
+            if (questionGroup == null) throw new MilliyMockException(404, "Question group not found");
+            
+            // delete image if exists
+            if (!string.IsNullOrEmpty(questionGroup.ImagePath))
+            { 
+                var deleteImage = fileService.Delete(questionGroup.ImagePath);
+                if (!deleteImage)
+                {
+                    logger.LogError("Failed to delete image at path {imagePath}", questionGroup.ImagePath);
+                    //throw new MilliyMockException(500, "Failed to delete associated image");
+                }
+            }
+
+            await unitOfWork.QuestionGroups.DeleteAsync(qg => qg.Id == questionGroupId);
+            return await unitOfWork.QuestionGroups.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting question group with id {questionGroupId}", questionGroupId);
+            throw new MilliyMockException();
+        }
+    }
 }

@@ -24,4 +24,12 @@ public class QuestionGroupController(IQuestionGroupService groupService) : BaseC
         {
             Data = await groupService.GetByTestIdAsync(testId)
         });
+    
+    [HttpDelete("{questionGroupId}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> DeleteAsync(long questionGroupId)
+        => Ok(new Response
+        {
+            Data = await groupService.DeleteAsync(questionGroupId)
+        });
 }

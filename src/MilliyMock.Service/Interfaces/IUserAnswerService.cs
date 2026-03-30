@@ -5,4 +5,5 @@ namespace MilliyMock.Service.Interfaces;
 public interface IUserAnswerService
 {
     Task<bool> CreateAsync(CreateUserAnswerDto dto);
+    Task<bool> UpdateAsync(UpdateUserAnswerDto dto);
 }

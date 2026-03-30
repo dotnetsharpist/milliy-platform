@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Enums;
@@ -11,144 +12,251 @@ using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
-public class UserTestAttemptService(IUnitOfWork unitOfWork, IMapper mapper) : IUserTestAttemptService
+public class UserTestAttemptService(
+    IUnitOfWork unitOfWork, 
+    IMapper mapper,
+    ILogger<UserTestAttemptService> logger) : IUserTestAttemptService
 {
     public async Task<UserTestAttemptResultDto> CreateAsync(CreateUserTestAttemptDto dto)
     {
-        var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+        try
+        {
+            logger.LogInformation("Creating test attempt for test {testId}", dto.TestId);
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
-        var ongoingAttempt =
-            await unitOfWork.UserTestAttempts.SelectAsync(a => a.UserId == userId && a.FinishedAt == null);
-        if (ongoingAttempt != null)
-            throw new MilliyMockException(409, "Finish your previous test.");
-            
-        var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
-        if (test is null) throw new MilliyMockException(404, "Test not found");
-        
-        var attempt = mapper.Map<UserTestAttempt>(dto);
-        attempt.UserId = userId;
-        
-        await unitOfWork.UserTestAttempts.InsertAsync(attempt);
-        await unitOfWork.UserTestAttempts.SaveAsync();
-        
-        return mapper.Map<UserTestAttemptResultDto>(attempt);
+            var ongoingAttempt = await unitOfWork.UserTestAttempts
+                .SelectAsync(a =>
+                    a.UserId == userId && a.TestId == dto.TestId && a.AttemptStatus != AttemptStatus.Completed);
+
+            if (ongoingAttempt != null)
+                throw new MilliyMockException(409, "Already have an active test twin.");
+
+            var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
+            if (test is null) throw new MilliyMockException(404, "Test not found");
+
+            var attempt = mapper.Map<UserTestAttempt>(dto);
+            attempt.UserId = userId;
+
+            await unitOfWork.UserTestAttempts.InsertAsync(attempt);
+            await unitOfWork.UserTestAttempts.SaveAsync();
+
+            return mapper.Map<UserTestAttemptResultDto>(attempt);
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating test attempt for test {testId}", dto.TestId);
+            throw new MilliyMockException();
+        }
     }
 
-    public async Task<AttemptedTestResultDto> SubmitTest()
+    public async Task<AttemptedTestResultDto> SubmitTest(long testId)
     {
-        var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
-        var testAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.UserId == userId);
-        if (testAttempt is null)
-            throw new MilliyMockException(404, "No test attempt found");
-        if (testAttempt.FinishedAt != null)
-            throw new MilliyMockException(400, "Test is already finished");
-
-        // Load questions with options
-        var questions = await unitOfWork.Questions
-            .SelectAll(q => q.TestId == testAttempt.TestId)
-            .Include(q => q.Options)
-            .Include(q => q.QuestionGroup)
-            .ThenInclude(g => g.Options)
-            .ToListAsync();
-
-        decimal totalScore = 0;
-        var correctCount = 0;
-        var incorectCount = 0;
-        decimal maxScore = 0;
-
-        foreach (var question in questions)
+        try
         {
-            var userAnswer = testAttempt.UserAnswers
-                .FirstOrDefault(ua => ua.QuestionId == question.Id);
+            logger.LogInformation("Submitting test attempt for test {testId}", testId);
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
-            if (userAnswer == null)
-                continue;
+            var testAttempt =
+                await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.TestId == testId && ta.UserId == userId);
 
-            var isCorrect = false;
+            if (testAttempt is null)
+                throw new MilliyMockException(404, "No test attempt found");
 
-            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-            switch (question.Type)
+            if (testAttempt.AttemptStatus == AttemptStatus.Completed)
+                throw new MilliyMockException(400, "Test is already finished");
+
+            // Load questions with options
+            var questions = await unitOfWork.Questions
+                .SelectAll(q => q.TestId == testAttempt.TestId)
+                .Include(q => q.Options)
+                .Include(q => q.QuestionGroup)
+                .ThenInclude(g => g.Options)
+                .ToListAsync();
+
+            decimal totalScore = 0;
+            var correctCount = 0;
+            var incorrectCount = 0;
+            decimal maxScore = 0;
+
+            foreach (var question in questions)
             {
-                case QuestionType.MultipleChoice:
-                {
-                    if (userAnswer.SelectedOptionId != null)
-                    {
-                        var option = question.Options
-                            .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
+                var userAnswer = testAttempt.UserAnswers
+                    .FirstOrDefault(ua => ua.QuestionId == question.Id);
 
-                        if (option != null && option.IsCorrect)
-                            isCorrect = true;
+                if (userAnswer == null)
+                    continue;
+
+                var isCorrect = false;
+
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+                switch (question.Type)
+                {
+                    case QuestionType.MultipleChoice:
+                    {
+                        if (userAnswer.SelectedOptionId != null)
+                        {
+                            var option = question.Options
+                                .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
+
+                            if (option != null && option.IsCorrect)
+                                isCorrect = true;
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
-
-                case QuestionType.Matching:
-                {
-                    if (userAnswer.SelectedOptionId != null && question.QuestionGroup != null)
+                    case QuestionType.Matching:
                     {
-                        var option = question.QuestionGroup.Options
-                            .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
+                        if (userAnswer.SelectedOptionId != null && question.QuestionGroup != null)
+                        {
+                            var option = question.QuestionGroup.Options
+                                .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
 
-                        // IMPORTANT:
-                        // Matching correctness must still be defined per option
-                        if (option != null && option.IsCorrect)
-                            isCorrect = true;
+                            // IMPORTANT:
+                            // Matching correctness must still be defined per option
+                            if (option is { IsCorrect: true })
+                                isCorrect = true;
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
-
-                case QuestionType.FreeAnswer:
-                {
-                    if (!string.IsNullOrWhiteSpace(userAnswer.TextAnswer) &&
-                        !string.IsNullOrWhiteSpace(question.CorrectAnswer))
+                    case QuestionType.FreeAnswer:
                     {
-                        isCorrect = Normalize(userAnswer.TextAnswer)
-                                    == Normalize(question.CorrectAnswer);
-                    }
+                        if (!string.IsNullOrWhiteSpace(userAnswer.TextAnswer) &&
+                            !string.IsNullOrWhiteSpace(question.CorrectAnswer))
+                        {
+                            isCorrect = Normalize(userAnswer.TextAnswer)
+                                        == Normalize(question.CorrectAnswer);
+                        }
 
-                    break;
+                        break;
+                    }
                 }
+
+                if (isCorrect)
+                {
+                    totalScore += question.Score;
+                    correctCount++;
+                }
+                else incorrectCount++;
+
+                maxScore += question.Score;
             }
 
-            if (isCorrect)
-            {
-                totalScore += question.Score;
-                correctCount++;
-            }
-            else incorectCount++;
+            testAttempt.TotalScore = totalScore;
+            testAttempt.AttemptStatus = AttemptStatus.Completed;
+            testAttempt.FinishedAt = DateTime.UtcNow;
 
-            maxScore += question.Score;
+            await unitOfWork.SaveChangesAsync();
+
+            return new AttemptedTestResultDto()
+            {
+                CorrectCount = correctCount,
+                IncorrectCount = incorrectCount,
+                MaxScore = maxScore,
+                TotalScore = totalScore
+            };
         }
-
-        testAttempt.TotalScore = totalScore;
-        testAttempt.FinishedAt = DateTime.UtcNow;
-
-        await unitOfWork.SaveChangesAsync();
-
-        return new AttemptedTestResultDto()
+        catch (MilliyMockException)
         {
-            CorrectCount = correctCount,
-            IncorrectCount = incorectCount,
-            MaxScore = maxScore,
-            TotalScore = totalScore
-        };
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error submitting test attempt for test {testId}", testId);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<bool> PauseTest(long testId)
+    {
+        try
+        {
+            logger.LogInformation("Pausing test attempt for test {testId}", testId);
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+
+            var testAttempt =
+                await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.TestId == testId && ta.UserId == userId);
+
+            if (testAttempt is null)
+                throw new MilliyMockException(404, "No test attempt found");
+
+            if (testAttempt.AttemptStatus == AttemptStatus.Completed)
+                throw new MilliyMockException(400, "Test is already finished");
+
+            testAttempt.AttemptStatus = AttemptStatus.Paused;
+            return await unitOfWork.UserTestAttempts.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error pausing test attempt for test {testId}", testId);
+            throw new MilliyMockException();
+        }
     }
 
 
     public async Task<List<UserTestAttemptResultDto>> GetByUserId()
     {
-        var userId = HttpContextHelper.UserId;
-        if (userId is null) throw new MilliyMockException();
+        try
+        {
+            logger.LogInformation("Retrieving test attempts for user {userId}", HttpContextHelper.UserId);
+            var userId = HttpContextHelper.UserId;
+            if (userId is null) throw new MilliyMockException();
 
-        var attempt = await unitOfWork.UserTestAttempts.SelectAll(a => a.UserId == userId)
-            .Include(a => a.UserAnswers)
-            .ToListAsync();
+            var attempt = await unitOfWork.UserTestAttempts.SelectAll(a => a.UserId == userId)
+                .Include(a => a.UserAnswers)
+                .ToListAsync();
 
-        return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
+            return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error retrieving test attempts for user {userId}", HttpContextHelper.UserId);
+            throw new MilliyMockException();
+        }
     }
-    
+
+    public async Task<List<UserTestAttemptResultDto>> GetProgressAsync(long testId)
+    {
+        try
+        {
+            logger.LogInformation("Retrieving in-progress test attempts for user {userId} and test {testId}",
+                HttpContextHelper.UserId, testId);
+            var userId = HttpContextHelper.UserId;
+            if (userId is null) throw new MilliyMockException();
+
+            var attempt = await unitOfWork.UserTestAttempts.SelectAll(a =>
+                    a.UserId == userId && a.TestId == testId && a.AttemptStatus != AttemptStatus.Completed)
+                .Include(a => a.UserAnswers)
+                .ToListAsync();
+
+            return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error retrieving in-progress test attempts for user {userId} and test {testId}",
+                HttpContextHelper.UserId, testId);
+            throw new MilliyMockException();
+        }
+    }
+
     private static string Normalize(string input)
     {
         return input.Trim().ToLower();

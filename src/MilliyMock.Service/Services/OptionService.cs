@@ -29,9 +29,36 @@ public class OptionService(IUnitOfWork unitOfWork,
             await unitOfWork.Options.InsertAsync(option);
             return await unitOfWork.Options.SaveAsync();
         }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error creating option {text}", dto.Text);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<bool> DeleteAsync(long optionId)
+    {
+        try
+        {
+            logger.LogInformation("Deleting option with id {optionId}", optionId);
+            var option = await unitOfWork.Options.SelectAsync(o => o.Id == optionId);
+            if (option == null)
+                throw new MilliyMockException(404, "Option not found");
+
+            await unitOfWork.Options.DeleteAsync(o => o.Id == optionId);
+            return await unitOfWork.Options.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting option with id {optionId}", optionId);
             throw new MilliyMockException();
         }
     }

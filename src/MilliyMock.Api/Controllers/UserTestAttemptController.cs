@@ -19,7 +19,7 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
     
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> CreateAsync()
+    public async Task<IActionResult> GetByUserId()
         => Ok(new Response
         {
             Data = await service.GetByUserId()
@@ -27,9 +27,25 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
 
     [HttpPost("submit")]
     [Authorize]
-    public async Task<IActionResult> SubmitAsync()
+    public async Task<IActionResult> SubmitAsync(long testId)
         => Ok(new Response
         {
-            Data = await service.SubmitTest()
+            Data = await service.SubmitTest(testId)
+        });
+    
+    [HttpPost("pause")]
+    [Authorize]
+    public async Task<IActionResult> PauseAsync(long testId)
+        => Ok(new Response
+        {
+            Data = await service.PauseTest(testId)
+        });
+
+    [HttpGet("get-progress")]
+    [Authorize]
+    public async Task<IActionResult> GetProgress(long testId)
+        => Ok(new Response
+        {
+            Data = await service.GetProgressAsync(testId)
         });
 }

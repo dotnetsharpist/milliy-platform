@@ -1,9 +1,11 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.UserAnswers;
 using MilliyMock.Service.Interfaces;
+using MilliyMock.Shared.Helpers;
 
 namespace MilliyMock.Service.Services;
 
@@ -19,6 +21,23 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
         
         var answer = mapper.Map<UserAnswer>(dto);
         await unitOfWork.UserAnswer.InsertAsync(answer);
+        return await unitOfWork.UserAnswer.SaveAsync();
+    }
+
+    public async Task<bool> UpdateAsync(UpdateUserAnswerDto dto)
+    {
+        var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+
+        var userAnswer = await unitOfWork.UserAnswer
+            .SelectAll(ua => ua.QuestionId == dto.QuestionId)
+            .Include(ua => ua.UserTestAttempt)
+            .FirstOrDefaultAsync();
+        if (userAnswer is null) return false;
+        
+        if (userId != userAnswer.UserTestAttempt.UserId)
+            throw new MilliyMockException(401, "UnAuthorized");
+
+        userAnswer = mapper.Map<UserAnswer>(dto);
         return await unitOfWork.UserAnswer.SaveAsync();
     }
 }

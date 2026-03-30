@@ -1,0 +1,8 @@
+namespace MilliyMock.Service.Dtos.UserAnswers;
+
+public class UpdateUserAnswerDto
+{
+    public long QuestionId { get; set; }
+    public long? SelectedOptionId { get; set; } 
+    public string? TextAnswer { get; set; } 
+}
