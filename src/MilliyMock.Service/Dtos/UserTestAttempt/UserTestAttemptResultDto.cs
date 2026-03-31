@@ -6,6 +6,7 @@ namespace MilliyMock.Service.Dtos.UserTestAttempt;
 
 public class UserTestAttemptResultDto
 {
+    public long Id { get; set; }
     public long UserId { get; set; }
     public UserResultDto User { get; set; } = null!;
 

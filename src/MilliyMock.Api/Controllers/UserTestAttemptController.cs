@@ -27,10 +27,10 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
 
     [HttpPost("submit")]
     [Authorize]
-    public async Task<IActionResult> SubmitAsync(long testId)
+    public async Task<IActionResult> SubmitAsync(long testId, long testAttemptId)
         => Ok(new Response
         {
-            Data = await service.SubmitTest(testId)
+            Data = await service.SubmitTest(testAttemptId)
         });
     
     [HttpPost("pause")]

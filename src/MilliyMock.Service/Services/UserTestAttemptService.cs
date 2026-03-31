@@ -28,8 +28,8 @@ public class UserTestAttemptService(
                 .SelectAsync(a =>
                     a.UserId == userId && a.TestId == dto.TestId && a.AttemptStatus != AttemptStatus.Completed);
 
-            if (ongoingAttempt != null)
-                throw new MilliyMockException(409, "Already have an active test twin.");
+            //if (ongoingAttempt != null)
+                //throw new MilliyMockException(409, "Already have an active test twin.");
 
             var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
             if (test is null) throw new MilliyMockException(404, "Test not found");
@@ -53,15 +53,17 @@ public class UserTestAttemptService(
         }
     }
 
-    public async Task<AttemptedTestResultDto> SubmitTest(long testId)
+    public async Task<AttemptedTestResultDto> SubmitTest(long testAttemptId)
     {
         try
         {
-            logger.LogInformation("Submitting test attempt for test {testId}", testId);
+            logger.LogInformation("Submitting test attempt for testAttemptId {testAttemptId}", testAttemptId);
             var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
-            var testAttempt =
-                await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.TestId == testId && ta.UserId == userId);
+            var testAttempt = await unitOfWork.UserTestAttempts
+                .SelectAll(ta => ta.Id == testAttemptId && ta.UserId == userId)
+                .Include(ta => ta.UserAnswers)
+                .FirstOrDefaultAsync();
 
             if (testAttempt is null)
                 throw new MilliyMockException(404, "No test attempt found");
@@ -168,7 +170,7 @@ public class UserTestAttemptService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error submitting test attempt for test {testId}", testId);
+            logger.LogError(ex, "Error submitting test attempt for test {testAttemptId}", testAttemptId);
             throw new MilliyMockException();
         }
     }
