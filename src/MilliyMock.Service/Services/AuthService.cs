@@ -19,6 +19,7 @@ namespace MilliyMock.Service.Services;
 
 public class AuthService(
     IUnitOfWork unitOfWork, 
+    IMapper mapper,
     ILogger<AuthService> logger,
     IConfiguration configuration) : IAuthService
 {
@@ -31,16 +32,31 @@ public class AuthService(
     
     public async ValueTask<LoginResultDto> Login(LoginDto dto)
     {
-        var user = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
-        if (user == null) throw new MilliyMockException(404, "User not found");
-
-        if (!PasswordHelper.Verify(dto.Password, user.PasswordHash))
-            throw new MilliyMockException(400, "Password or email is incorrect");
-
-        return new LoginResultDto
+        try
         {
-            Token = GenerateToken(user)
-        };
+            logger.LogInformation("Login attempt for email {email}", dto.Email);
+            var user = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
+            if (user == null) throw new MilliyMockException(404, "User not found");
+
+            if (!PasswordHelper.Verify(dto.Password, user.PasswordHash))
+                throw new MilliyMockException(400, "Password or email is incorrect");
+
+            return new LoginResultDto
+            {
+                Token = GenerateToken(user),
+                User = mapper.Map<UserResultDto>(user)
+            };
+        }
+        catch (MilliyMockException ex)
+        {
+            logger.LogWarning(ex, "Login failed for email {email} with message: {message}", dto.Email, ex.Message);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during login for email {email}", dto.Email);
+            throw new MilliyMockException();
+        }
     }
     
     private string GenerateToken(User user)

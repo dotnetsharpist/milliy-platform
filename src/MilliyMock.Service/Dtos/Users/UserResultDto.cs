@@ -1,10 +1,15 @@
+using MilliyMock.Domain.Enums;
+
 namespace MilliyMock.Service.Dtos.Users;
 
 public class UserResultDto
 {
-    public required string FullName { get; set; }
-    public required string Email { get; set; }
-    public required string CurrentGrade { get; set; } // "11", "12", "Undergraduate", "Gap Year"
-    public required string Major { get; set; }
-    public bool WantsOpportunityNotifications { get; set; } = true;
+    public string FullName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public bool EmailConfirmed { get; set; }
+    public string? PasswordHash { get; set; }
+    public string? GoogleId { get; set; }
+    public long? BotUserId { get; set; }
+    //public BotUser? BotUser { get; set; }
+    public UserRole Role { get; set; }
 }
