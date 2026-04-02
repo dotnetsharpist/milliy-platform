@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
@@ -36,6 +37,44 @@ public class OptionService(IUnitOfWork unitOfWork,
         catch (Exception ex)
         {
             logger.LogError(ex, "Error creating option {text}", dto.Text);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<List<OptionResultDto>> GetByQuestionIdAsync(long? questionId, long? questionGroupId)
+    {
+        try
+        {
+            if (questionId == null && questionGroupId == null)
+                throw new MilliyMockException(409, "Both ids cannot be null");
+            
+            logger.LogInformation("Getting options by questionId {questionId} and questionGroupId {questionGroupId}", questionId, questionGroupId);
+            if ((questionId == null && questionGroupId == null) || (questionId != null && questionGroupId != null)) 
+                throw new Exception("Option must belong to either Question OR QuestionGroup");
+            var options = new List<OptionResultDto>();
+            
+            if (questionGroupId.HasValue)
+            {
+                var optionsByGroup = await unitOfWork.Options.SelectAll(o => o.QuestionGroupId == questionGroupId).ToListAsync();
+                options = mapper.Map<List<OptionResultDto>>(optionsByGroup);
+            }
+
+            if (questionId.HasValue)
+            {
+                var optionsByQuestion =
+                    await unitOfWork.Options.SelectAll(o => o.QuestionId == questionId).ToListAsync();
+                options = mapper.Map<List<OptionResultDto>>(optionsByQuestion);
+            }
+
+            return options;
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting options by questionId {questionId} and questionGroupId {questionGroupId}", questionId, questionGroupId);
             throw new MilliyMockException();
         }
     }

@@ -19,7 +19,7 @@ public class QuestionController(IQuestionService questionService) : BaseControll
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetByTestIdAsync(long testId)
+    public async Task<IActionResult> GetByTestIdAsync([FromQuery] long testId)
         => Ok(new Response
         {
             Data = await questionService.GetByTestIdAsync(testId)

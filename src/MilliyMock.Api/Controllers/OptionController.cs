@@ -17,6 +17,14 @@ public class OptionController(IOptionService optionService) : BaseController
             Data = await optionService.CreateAsync(dto)
         });
     
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetByQuestionIdAsync([FromQuery] long? questionId, [FromQuery] long? questionGroupId)
+        => Ok(new Response
+        {
+            Data = await optionService.GetByQuestionIdAsync(questionId, questionGroupId)
+        });
+    
     [HttpPut("{optionId}")]
     [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> UpdateAsync(long optionId, UpdateOptionDto dto)
