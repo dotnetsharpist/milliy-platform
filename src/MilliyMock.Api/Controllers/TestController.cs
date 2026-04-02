@@ -16,6 +16,23 @@ public class TestController(ITestService testService) : BaseController
         {
             Data = await testService.CreateAsync(dto)
         });
+    
+    [HttpPut("{testId:long}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> UpdateTest(long testId, [FromBody] UpdateTestDto dto)
+        => Ok(new Response
+        {
+            Data = await testService.UpdateAsync(testId, dto)
+        });
+    
+    [HttpDelete("{testId:long}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> DeleteAsync(long testId)
+        => Ok(new Response
+        {
+            Data = await testService.DeleteAsync(testId)
+        });
+
 
     [AllowAnonymous]
     [HttpGet]

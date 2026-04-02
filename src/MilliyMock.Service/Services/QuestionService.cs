@@ -47,6 +47,87 @@ public class QuestionService(
         }
     }
 
+    public async Task<bool> UpdateAsync(long questionId, UpdateQuestionDto dto)
+    {
+        try
+        {
+            logger.LogInformation("Updating question with id {questionId}", questionId);
+
+            var question = await unitOfWork.Questions
+                .SelectAll(q => q.Id == questionId && !q.IsDeleted)
+                .Include(q => q.Options)
+                .FirstOrDefaultAsync();
+
+            if (question is null) throw new MilliyMockException(404, "Question not found");
+
+            // image replacement
+            if (dto.Image is not null)
+            {
+                if (question.ImagePath is not null)
+                    fileService.Delete(question.ImagePath);
+                question.ImagePath = await fileService.UploadImage(dto.Image);
+            }
+
+            mapper.Map(dto, question);
+            question.UpdatedBy = HttpContextHelper.UserId;
+            question.UpdatedAt = TimeHelper.GetDateTime();
+
+            // Handle options if provided
+            if (dto.Options is not null)
+            {
+                var existingOptions = question.Options.Where(o => !o.IsDeleted).ToList();
+                var incomingIds = dto.Options.Where(o => o.Id > 0).Select(o => o.Id).ToHashSet();
+
+                // Soft-delete options not present in the incoming list
+                /*
+                foreach (var option in existingOptions)
+                {
+                    if (!incomingIds.Contains(option.Id)) 
+                        await unitOfWork.Options.DeleteAsync(o => o.Id == option.Id);
+                }
+                */
+
+                foreach (var optionDto in dto.Options)
+                {
+                    if (optionDto.Id > 0)
+                    {
+                        // Update existing option
+                        var existing = existingOptions.FirstOrDefault(o => o.Id == optionDto.Id);
+                        if (existing is not null)
+                        {
+                            existing.Text = optionDto.Text;
+                            existing.IsCorrect = optionDto.IsCorrect;
+                            existing.UpdatedBy = HttpContextHelper.UserId;
+                            existing.UpdatedAt = TimeHelper.GetDateTime();
+                        }
+                    }
+                    else
+                    {
+                        await unitOfWork.Options.InsertAsync(new Option
+                        {
+                            Text = optionDto.Text,
+                            IsCorrect = optionDto.IsCorrect,
+                            QuestionId = questionId,
+                            CreatedBy = HttpContextHelper.UserId
+                        });
+                    }
+                }
+            }
+
+            unitOfWork.Questions.Update(question);
+            return await unitOfWork.Questions.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating question with id {questionId}", questionId);
+            throw new MilliyMockException();
+        }
+    }
+
     public async Task<List<QuestionResultDto>> GetByTestIdAsync(long testId)
     {
         var questions = await unitOfWork.Questions.SelectAll(q => q.TestId == testId).ToListAsync();

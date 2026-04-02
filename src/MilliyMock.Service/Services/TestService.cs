@@ -24,10 +24,31 @@ public class TestService(
         return await unitOfWork.Tests.SaveAsync();
     }
 
+    public async Task<bool> UpdateAsync(long testId, UpdateTestDto dto)
+    {
+        var test = await unitOfWork.Tests.SelectAsync(t => t.Id == testId);
+        if (test is null) throw new MilliyMockException(404, "Test not found");
+
+        mapper.Map(dto, test);
+        test.UpdatedBy = HttpContextHelper.UserId;
+        test.UpdatedAt = TimeHelper.GetDateTime();
+        unitOfWork.Tests.Update(test);
+        return await unitOfWork.Tests.SaveAsync();
+    }
+
+    public async Task<bool> DeleteAsync(long testId)
+    {
+        var test = await unitOfWork.Tests.SelectAsync(t => t.Id == testId);
+        if (test is null) throw new MilliyMockException(404, "Test not found");
+
+        test.IsDeleted = true;
+        return await unitOfWork.Tests.SaveAsync();
+    }
+
     public async Task<List<TestResultDto>> GetAllAsync()
     {
         return await unitOfWork.Tests
-            .SelectAll()
+            .SelectAll(t => !t.IsDeleted)
             .Select(test => new TestResultDto
             {
                 Id = test.Id,
@@ -48,7 +69,7 @@ public class TestService(
     {
         try
         {
-            var test = await unitOfWork.Tests.SelectAll(t => t.Id == testId)
+            var test = await unitOfWork.Tests.SelectAll(t => t.Id == testId && !t.IsDeleted)
                 .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Options)
                 .FirstOrDefaultAsync();
 

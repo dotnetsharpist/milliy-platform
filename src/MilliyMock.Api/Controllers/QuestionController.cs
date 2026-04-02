@@ -32,4 +32,12 @@ public class QuestionController(IQuestionService questionService) : BaseControll
         {
             Data = await questionService.DeleteAsync(questionId)
         });
+
+    [HttpPut("{questionId}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> UpdateAsync(long questionId, [FromForm] UpdateQuestionDto dto)
+        => Ok(new Response
+        {
+            Data = await questionService.UpdateAsync(questionId, dto)
+        });
 }

@@ -22,6 +22,7 @@ public class MapperProfile : Profile
         
         // Test
         CreateMap<Test, CreateTestDto>().ReverseMap();
+        CreateMap<Test, UpdateTestDto>().ReverseMap();
         CreateMap<Test, TestResultDto>().ReverseMap();
         CreateMap<Test, FullTestResultDto>().ReverseMap();
         
@@ -34,6 +35,9 @@ public class MapperProfile : Profile
         
         // Question
         CreateMap<Question, CreateQuestionDto>().ForMember(dest => dest.Image, opt => opt.Ignore()).ReverseMap();
+        CreateMap<UpdateQuestionDto, Question>()
+            .ForMember(dest => dest.ImagePath, opt => opt.Ignore())
+            .ForMember(dest => dest.Options, opt => opt.Ignore());
         CreateMap<Question, QuestionResultDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptForQuestionGroupDto>().ReverseMap();
