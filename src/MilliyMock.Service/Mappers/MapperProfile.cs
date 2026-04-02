@@ -44,6 +44,7 @@ public class MapperProfile : Profile
         
         // Option
         CreateMap<Option, CreateOptionDto>().ReverseMap();
+        CreateMap<UpdateOptionDto, Option>().ReverseMap();
         CreateMap<Option, OptionResultDto>().ReverseMap();
         CreateMap<Option, OptionAttemptDto>().ReverseMap();
         

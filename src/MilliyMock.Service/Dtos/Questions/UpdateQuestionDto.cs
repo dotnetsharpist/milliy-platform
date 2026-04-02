@@ -12,12 +12,4 @@ public class UpdateQuestionDto
     public decimal Score { get; set; }
     public QuestionType Type { get; set; }
     public string? CorrectAnswer { get; set; }
-
-    /// <summary>
-    /// Full list of options after update.
-    /// Options with Id > 0 will be updated; Id == 0 will be created; any existing option
-    /// whose Id is not present in this list will be soft-deleted.
-    /// Omit (null) to leave options unchanged.
-    /// </summary>
-    public List<UpdateQuestionOptionDto>? Options { get; set; }
 }

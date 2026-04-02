@@ -40,6 +40,32 @@ public class OptionService(IUnitOfWork unitOfWork,
         }
     }
 
+    public async Task<bool> UpdateAsync(long optionId, UpdateOptionDto dto)
+    {
+        try
+        {
+            logger.LogInformation("Updating option with id {optionId}", optionId);
+            var option = await unitOfWork.Options.SelectAsync(o => o.Id == optionId);
+            if (option == null)
+                throw new MilliyMockException(404, "Option not found");
+
+            mapper.Map(dto, option);
+            option.UpdatedBy = HttpContextHelper.UserId;
+            option.UpdatedAt = TimeHelper.GetDateTime();
+            unitOfWork.Options.Update(option);
+            return await unitOfWork.Options.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating option with id {optionId}", optionId);
+            throw new MilliyMockException();
+        }
+    }
+
     public async Task<bool> DeleteAsync(long optionId)
     {
         try

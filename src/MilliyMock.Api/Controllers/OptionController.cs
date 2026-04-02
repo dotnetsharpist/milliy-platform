@@ -17,6 +17,14 @@ public class OptionController(IOptionService optionService) : BaseController
             Data = await optionService.CreateAsync(dto)
         });
     
+    [HttpPut("{optionId}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> UpdateAsync(long optionId, UpdateOptionDto dto)
+        => Ok(new Response
+        {
+            Data = await optionService.UpdateAsync(optionId, dto) 
+        });
+    
     [HttpDelete("{optionId}")]
     [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> DeleteAsync(long optionId)
