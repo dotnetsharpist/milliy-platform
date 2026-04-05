@@ -37,6 +37,13 @@ public class QuestionService(
                 question.ImagePath = imagePath;
             }
 
+            if (dto.Options is not null && dto.Options.Count > 0)
+            {
+                question.Options = mapper.Map<List<Option>>(dto.Options);
+                foreach (var option in question.Options)
+                    option.CreatedBy = HttpContextHelper.UserId;
+            }
+
             await unitOfWork.Questions.InsertAsync(question);
             return await unitOfWork.Questions.SaveAsync();
         }
