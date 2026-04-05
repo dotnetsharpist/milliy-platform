@@ -45,7 +45,7 @@ public class QuestionService(
             }
 
             await unitOfWork.Questions.InsertAsync(question);
-            return await unitOfWork.Questions.SaveAsync();
+            return await unitOfWork.SaveChangesAsync();
         }
         catch (Exception ex)
         {
