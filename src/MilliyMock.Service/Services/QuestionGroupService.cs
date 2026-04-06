@@ -39,6 +39,17 @@ public class QuestionGroupService(
         }
     }
 
+    public async Task<QuestionGroupResultDto> GetByIdAsync(long questionGroupId)
+    {
+        var questionGroup = await unitOfWork.QuestionGroups
+            .SelectAll(qg => qg.Id == questionGroupId)
+            .Include(g => g.Questions)
+            .Include(qg => qg.Options)
+            .FirstOrDefaultAsync();
+
+        return mapper.Map<QuestionGroupResultDto>(questionGroup);
+    }
+
     public async Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId)
     {
         var questionGroups = await unitOfWork.QuestionGroups
