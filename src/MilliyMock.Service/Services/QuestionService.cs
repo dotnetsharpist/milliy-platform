@@ -20,17 +20,20 @@ public class QuestionService(
     {
         try
         {
-            var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
-            if (test is null) throw new MilliyMockException(404, "Test not found");
+            var question = mapper.Map<Question>(dto);
+            question.CreatedBy = HttpContextHelper.UserId;
 
             if (dto.QuestionGroupId is not null)
             {
                 var questionGroup = await unitOfWork.QuestionGroups.SelectAsync(qg => qg.Id == dto.QuestionGroupId);
                 if (questionGroup is null) throw new MilliyMockException(404, "Question group not found");
+                question.TestId = questionGroup.TestId;
             }
-
-            var question = mapper.Map<Question>(dto);
-            question.CreatedBy = HttpContextHelper.UserId;
+            else
+            {
+                var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
+                if (test is null) throw new MilliyMockException(404, "Test not found");
+            }
             if (dto.Image is not null)
             {
                 var imagePath = await fileService.UploadImage(dto.Image);
