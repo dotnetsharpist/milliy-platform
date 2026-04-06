@@ -65,6 +65,16 @@ public class TestService(
             .ToListAsync();
     }
 
+    public async Task<TestResultDto> GetByIdAsync(long testId)
+    {
+        var test = await unitOfWork.Tests.SelectAsync(t => t.Id == testId && !t.IsDeleted);
+        if (test is null) throw new MilliyMockException(404, "Test not found");
+
+        var testDto = mapper.Map<TestResultDto>(test);
+
+        return testDto;
+    }
+
     public async Task<FullTestResultDto> GetFullTest(long testId)
     {
         try

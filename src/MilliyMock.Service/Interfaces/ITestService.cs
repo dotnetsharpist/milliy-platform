@@ -8,5 +8,6 @@ public interface ITestService
     Task<bool> UpdateAsync(long testId, UpdateTestDto dto);
     Task<bool> DeleteAsync(long testId);
     Task<List<TestResultDto>> GetAllAsync();
+    Task<TestResultDto> GetByIdAsync(long testId);
     Task<FullTestResultDto> GetFullTest(long testId);
 }
