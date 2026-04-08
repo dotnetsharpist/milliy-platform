@@ -64,7 +64,7 @@ public class MapperProfile : Profile
         CreateMap<QuestionExplanation, CreateQuestionExplanationDto>()
             .ForMember(dest => dest.Image, opt => opt.Ignore())
             .ReverseMap();
-        CreateMap<QuestionExplanation, QuestionExplanationResult>().ReverseMap();
+        CreateMap<QuestionExplanation, QuestionExplanationResultDto>().ReverseMap();
         CreateMap<QuestionExplanation, UpdateQuestionExplanationDto>()
             .ForMember(dest => dest.Image, opt => opt.Ignore())
             .ReverseMap();
