@@ -53,6 +53,7 @@ public class TestService(
             {
                 Id = test.Id,
                 Title = test.Title,
+                Description = test.Description,
 
                 QuestionCount = unitOfWork.Questions
                     .SelectAll()
