@@ -75,7 +75,7 @@ public class UserTestAttemptService(
             var questions = await unitOfWork.Questions
                 .SelectAll(q => q.TestId == testAttempt.TestId)
                 .Include(q => q.Options)
-                .Include(q => q.QuestionGroup)
+                .Include(q => q.QuestionGroups)
                 .ThenInclude(g => g.Options)
                 .ToListAsync();
 
@@ -113,9 +113,9 @@ public class UserTestAttemptService(
 
                     case QuestionType.Matching:
                     {
-                        if (userAnswer.SelectedOptionId != null && question.QuestionGroup != null)
+                        if (userAnswer.SelectedOptionId != null && question.QuestionGroups != null)
                         {
-                            var option = question.QuestionGroup.Options
+                            var option = question.QuestionGroups.Options
                                 .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
 
                             // IMPORTANT:

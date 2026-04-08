@@ -1,8 +1,10 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Interfaces;
@@ -20,21 +22,93 @@ public class QuestionGroupService(
     {
         try
         {
-            var questionGroup = mapper.Map<QuestionGroup>(dto);
-            questionGroup.CreatedBy = HttpContextHelper.UserId;
-            
-            if (dto.Image is not null)
+            var questionGroup = new QuestionGroup
             {
-                var imagePath = await fileService.UploadImage(dto.Image);
-                questionGroup.ImagePath = imagePath;
+                TestId = dto.TestId,
+                CreatedBy = HttpContextHelper.UserId
+            };
+
+            // verify test exists
+            var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
+            if (test is null) throw new MilliyMockException(404, "Test not found");
+
+            // build translations
+            if (dto.TitleUz is not null || dto.TitleRu is not null)
+            {
+                if (dto.TitleUz is not null)
+                {
+                    string? imagePathUz = dto.ImageUz is not null
+                        ? await fileService.UploadImage(dto.ImageUz)
+                        : null;
+
+                    questionGroup.Translations.Add(new Translation
+                    {
+                        Language = Language.Uzbek,
+                        Text = dto.TitleUz,
+                        ImagePath = imagePathUz,
+                        QuestionGroup = questionGroup
+                    });
+                }
+
+                if (dto.TitleRu is not null)
+                {
+                    string? imagePathRu = dto.ImageRu is not null
+                        ? await fileService.UploadImage(dto.ImageRu)
+                        : null;
+
+                    questionGroup.Translations.Add(new Translation
+                    {
+                        Language = Language.Russian,
+                        Text = dto.TitleRu,
+                        ImagePath = imagePathRu,
+                        QuestionGroup = questionGroup
+                    });
+                }
             }
 
             await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
             return await unitOfWork.QuestionGroups.SaveAsync();
         }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating QuestionGroup {text}", dto.Title);
+            logger.LogError(ex, "Error creating QuestionGroup {text}", dto.TitleUz);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<bool> UpdateAsync(long questionGroupId, UpdateQuestionGroupDto dto)
+    {
+        try
+        {
+            logger.LogInformation("Updating question group with id {questionGroupId}", questionGroupId);
+
+            var questionGroup = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.Id == questionGroupId && !qg.IsDeleted)
+                .Include(qg => qg.Translations)
+                .FirstOrDefaultAsync();
+
+            if (questionGroup is null) throw new MilliyMockException(404, "Question group not found");
+
+            await UpdateTranslationAsync(questionGroup, Language.Uzbek, dto.TitleUz, dto.ImageUz);
+            await UpdateTranslationAsync(questionGroup, Language.Russian, dto.TitleRu, dto.ImageRu);
+
+            questionGroup.UpdatedBy = HttpContextHelper.UserId;
+            questionGroup.UpdatedAt = TimeHelper.GetDateTime();
+
+            unitOfWork.QuestionGroups.Update(questionGroup);
+            return await unitOfWork.QuestionGroups.SaveAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating question group with id {questionGroupId}", questionGroupId);
             throw new MilliyMockException();
         }
     }
@@ -42,10 +116,14 @@ public class QuestionGroupService(
     public async Task<QuestionGroupResultDto> GetByIdAsync(long questionGroupId)
     {
         var questionGroup = await unitOfWork.QuestionGroups
-            .SelectAll(qg => qg.Id == questionGroupId)
-            .Include(g => g.Questions)
+            .SelectAll(qg => qg.Id == questionGroupId && !qg.IsDeleted)
+            .Include(qg => qg.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Options)
             .Include(qg => qg.Options)
             .FirstOrDefaultAsync();
+
+        if (questionGroup is null) throw new MilliyMockException(404, "Question group not found");
 
         return mapper.Map<QuestionGroupResultDto>(questionGroup);
     }
@@ -53,11 +131,13 @@ public class QuestionGroupService(
     public async Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId)
     {
         var questionGroups = await unitOfWork.QuestionGroups
-            .SelectAll(qg => qg.TestId == testId)
-            .Include(g => g.Questions)
-            .Include(g => g.Options)
+            .SelectAll(qg => qg.TestId == testId && !qg.IsDeleted)
+            .Include(qg => qg.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Options)
+            .Include(qg => qg.Options)
             .ToListAsync();
-        
+
         return mapper.Map<List<QuestionGroupResultDto>>(questionGroups);
     }
 
@@ -66,17 +146,22 @@ public class QuestionGroupService(
         try
         {
             logger.LogInformation("Deleting question group with id {questionGroupId}", questionGroupId);
-            var questionGroup = await unitOfWork.QuestionGroups.SelectAsync(qg => qg.Id == questionGroupId);
-            if (questionGroup == null) throw new MilliyMockException(404, "Question group not found");
-            
-            // delete image if exists
-            if (!string.IsNullOrEmpty(questionGroup.ImagePath))
-            { 
-                var deleteImage = fileService.Delete(questionGroup.ImagePath);
-                if (!deleteImage)
+
+            var questionGroup = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.Id == questionGroupId)
+                .Include(qg => qg.Translations)
+                .FirstOrDefaultAsync();
+
+            if (questionGroup is null) throw new MilliyMockException(404, "Question group not found");
+
+            // delete translation images
+            foreach (var translation in questionGroup.Translations)
+            {
+                if (translation.ImagePath is not null)
                 {
-                    logger.LogError("Failed to delete image at path {imagePath}", questionGroup.ImagePath);
-                    //throw new MilliyMockException(500, "Failed to delete associated image");
+                    var deleted = fileService.Delete(translation.ImagePath);
+                    if (!deleted)
+                        logger.LogError("Failed to delete image at path {imagePath}", translation.ImagePath);
                 }
             }
 
@@ -91,6 +176,29 @@ public class QuestionGroupService(
         {
             logger.LogError(ex, "Error deleting question group with id {questionGroupId}", questionGroupId);
             throw new MilliyMockException();
+        }
+    }
+
+    private async Task UpdateTranslationAsync(QuestionGroup group, Language language, string? newTitle, IFormFile? newImage)
+    {
+        if (newTitle is null) return;
+
+        var translation = group.Translations.FirstOrDefault(t => t.Language == language);
+        if (translation is null)
+        {
+            translation = new Translation { Language = language, QuestionGroup = group, Text = newTitle };
+            group.Translations.Add(translation);
+        }
+        else
+        {
+            translation.Text = newTitle;
+        }
+
+        if (newImage is not null)
+        {
+            if (translation.ImagePath is not null)
+                fileService.Delete(translation.ImagePath);
+            translation.ImagePath = await fileService.UploadImage(newImage);
         }
     }
 }

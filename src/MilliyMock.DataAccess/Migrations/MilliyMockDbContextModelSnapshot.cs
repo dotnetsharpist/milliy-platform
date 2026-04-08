@@ -122,9 +122,6 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<long?>("CreatedBy")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -139,9 +136,6 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.Property<long>("TestId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("text");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -161,7 +155,7 @@ namespace MilliyMock.DataAccess.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
+            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionExplanation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,11 +175,50 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("TestId")
+                    b.Property<long?>("QuestionGroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Title")
+                    b.Property<long?>("QuestionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionGroupId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("QuestionExplanations");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("TestId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -220,6 +253,9 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -233,6 +269,59 @@ namespace MilliyMock.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tests");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.Translation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Language")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("QuestionExplanationId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("QuestionGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("QuestionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionExplanationId");
+
+                    b.HasIndex("QuestionGroupId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.User", b =>
@@ -294,13 +383,13 @@ namespace MilliyMock.DataAccess.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 4, 2, 0, 54, 50, 724, DateTimeKind.Utc).AddTicks(9950),
+                            CreatedAt = new DateTime(2026, 4, 8, 19, 11, 14, 573, DateTimeKind.Utc).AddTicks(3550),
                             CreatedBy = 1L,
                             Email = "ysharpist@gmail.com",
                             EmailConfirmed = false,
                             FullName = "Abdurrohman",
                             IsDeleted = false,
-                            PasswordHash = "$2a$11$4VafmAxZ49lYSfFJRgi6zuz3c5p8/KX8rR8jNKSwfT.ZtnKKNmeaS",
+                            PasswordHash = "$2a$11$UQWwfuKNfIgs0eIQgl8k.ewmEJ9yeZEc0lLyV8oXOhpQZgYAJu1hy",
                             Role = 1
                         });
                 });
@@ -421,7 +510,7 @@ namespace MilliyMock.DataAccess.Migrations
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Question", b =>
                 {
-                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", "QuestionGroup")
+                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", "QuestionGroups")
                         .WithMany("Questions")
                         .HasForeignKey("QuestionGroupId");
 
@@ -431,20 +520,56 @@ namespace MilliyMock.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("QuestionGroup");
+                    b.Navigation("QuestionGroups");
 
                     b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionExplanation", b =>
+                {
+                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", "QuestionGroup")
+                        .WithMany()
+                        .HasForeignKey("QuestionGroupId");
+
+                    b.HasOne("MilliyMock.Domain.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuestionGroup");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
                 {
                     b.HasOne("MilliyMock.Domain.Entities.Test", "Test")
-                        .WithMany()
+                        .WithMany("QuestionGroups")
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.Translation", b =>
+                {
+                    b.HasOne("MilliyMock.Domain.Entities.QuestionExplanation", "QuestionExplanation")
+                        .WithMany("Translations")
+                        .HasForeignKey("QuestionExplanationId");
+
+                    b.HasOne("MilliyMock.Domain.Entities.QuestionGroup", "QuestionGroup")
+                        .WithMany("Translations")
+                        .HasForeignKey("QuestionGroupId");
+
+                    b.HasOne("MilliyMock.Domain.Entities.Question", "Question")
+                        .WithMany("Translations")
+                        .HasForeignKey("QuestionId");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuestionExplanation");
+
+                    b.Navigation("QuestionGroup");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.User", b =>
@@ -503,6 +628,13 @@ namespace MilliyMock.DataAccess.Migrations
             modelBuilder.Entity("MilliyMock.Domain.Entities.Question", b =>
                 {
                     b.Navigation("Options");
+
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionExplanation", b =>
+                {
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
@@ -510,10 +642,14 @@ namespace MilliyMock.DataAccess.Migrations
                     b.Navigation("Options");
 
                     b.Navigation("Questions");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Test", b =>
                 {
+                    b.Navigation("QuestionGroups");
+
                     b.Navigation("Questions");
                 });
 

@@ -5,8 +5,6 @@ namespace MilliyMock.Domain.Entities;
 
 public class Question : Auditable
 {
-    public string? Text { get; set; }
-    public string? ImagePath { get; set; }
     public int Order { get; set; }
     public decimal Score { get; set; }
     public QuestionType Type { get; set; }
@@ -14,7 +12,7 @@ public class Question : Auditable
     public Test Test { get; set; }
     public string? CorrectAnswer { get; set; }
     public long? QuestionGroupId { get; set; }
-    public QuestionGroup? QuestionGroup { get; set; }
-
+    public QuestionGroup? QuestionGroups { get; set; }
+    public ICollection<Translation> Translations { get; set; } = new List<Translation>();
     public ICollection<Option> Options { get; set; } = new List<Option>();
 }

@@ -16,6 +16,8 @@ public class UnitOfWork(MilliyMockDbContext dbContext) : IUnitOfWork
     public IRepository<Test> Tests { get; } = new Repository<Test>(dbContext);
     public IRepository<QuestionGroup> QuestionGroups { get; } = new Repository<QuestionGroup>(dbContext);
     public IRepository<Question> Questions { get; } = new Repository<Question>(dbContext);
+    public IRepository<Translation> Translations { get; } = new Repository<Translation>(dbContext);
+    public IRepository<QuestionExplanation> QuestionExplanations { get; } = new Repository<QuestionExplanation>(dbContext);
     public IRepository<Option> Options { get; } = new Repository<Option>(dbContext);
     public IRepository<UserTestAttempt> UserTestAttempts { get; } = new Repository<UserTestAttempt>(dbContext);
     public IRepository<UserAnswer> UserAnswer { get; } = new Repository<UserAnswer>(dbContext);

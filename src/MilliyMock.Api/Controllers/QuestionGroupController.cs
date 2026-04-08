@@ -16,6 +16,14 @@ public class QuestionGroupController(IQuestionGroupService groupService) : BaseC
         {
             Data = await groupService.CreateAsync(dto)
         });
+
+    [HttpPut("{questionGroupId}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> UpdateAsync(long questionGroupId, UpdateQuestionGroupDto dto)
+        => Ok(new Response
+        {
+            Data = await groupService.UpdateAsync(questionGroupId, dto)
+        });
     
     [HttpGet]
     [Authorize]

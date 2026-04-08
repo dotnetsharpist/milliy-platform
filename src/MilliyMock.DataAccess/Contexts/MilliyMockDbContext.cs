@@ -28,6 +28,8 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Test> Tests { get; init; }
     public DbSet<QuestionGroup> QuestionGroups { get; init; }
     public DbSet<Question> Questions { get; init; }
+    public DbSet<Translation> Translations { get; init; }
+    public DbSet<QuestionExplanation> QuestionExplanations { get; init; }
     public DbSet<Option> Options { get; init; }
     public DbSet<UserTestAttempt> UserTestAttempts { get; init; }
     public DbSet<UserAnswer> UserAnswers { get; init; }

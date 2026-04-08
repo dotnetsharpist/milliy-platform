@@ -6,10 +6,13 @@ namespace MilliyMock.Service.Dtos.Questions;
 
 public class UpdateQuestionDto
 {
-    public string? Text { get; set; }
-    public IFormFile? Image { get; set; }
+    public string? TextUz { get; set; }
+    public string? TextRu { get; set; }
+    public IFormFile? ImageUz { get; set; }
+    public IFormFile? ImageRu { get; set; }
     public int Order { get; set; }
     public decimal Score { get; set; }
     public QuestionType Type { get; set; }
     public string? CorrectAnswer { get; set; }
+    public List<UpdateQuestionOptionDto>? Options { get; set; }
 }

@@ -5,6 +5,7 @@ namespace MilliyMock.Service.Interfaces;
 public interface IQuestionGroupService
 {
     Task<bool> CreateAsync(CreateQuestionGroupDto dto);
+    Task<bool> UpdateAsync(long questionGroupId, UpdateQuestionGroupDto dto);
     Task<QuestionGroupResultDto> GetByIdAsync(long questionGroupId);
     Task<List<QuestionGroupResultDto>> GetByTestIdAsync(long testId);
     Task<bool> DeleteAsync(long questionGroupId);

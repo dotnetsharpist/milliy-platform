@@ -39,6 +39,8 @@ namespace MilliyMock.DataAccess.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -85,7 +87,6 @@ namespace MilliyMock.DataAccess.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "text", nullable: true),
                     TestId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -112,8 +113,10 @@ namespace MilliyMock.DataAccess.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     TestId = table.Column<long>(type: "bigint", nullable: false),
+                    AttemptStatus = table.Column<int>(type: "integer", nullable: false),
                     StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     FinishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    TimeSpent = table.Column<TimeSpan>(type: "interval", nullable: false),
                     TotalScore = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -144,8 +147,6 @@ namespace MilliyMock.DataAccess.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Text = table.Column<string>(type: "text", nullable: true),
-                    ImagePath = table.Column<string>(type: "text", nullable: true),
                     Order = table.Column<int>(type: "integer", nullable: false),
                     Score = table.Column<decimal>(type: "numeric", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
@@ -206,6 +207,37 @@ namespace MilliyMock.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "QuestionExplanations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    ImagePath = table.Column<string>(type: "text", nullable: true),
+                    QuestionId = table.Column<long>(type: "bigint", nullable: true),
+                    QuestionGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionExplanations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionExplanations_QuestionGroups_QuestionGroupId",
+                        column: x => x.QuestionGroupId,
+                        principalTable: "QuestionGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionExplanations_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserAnswers",
                 columns: table => new
                 {
@@ -243,10 +275,48 @@ namespace MilliyMock.DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Translations",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Language = table.Column<int>(type: "integer", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    ImagePath = table.Column<string>(type: "text", nullable: true),
+                    QuestionId = table.Column<long>(type: "bigint", nullable: true),
+                    QuestionGroupId = table.Column<long>(type: "bigint", nullable: true),
+                    QuestionExplanationId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Translations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Translations_QuestionExplanations_QuestionExplanationId",
+                        column: x => x.QuestionExplanationId,
+                        principalTable: "QuestionExplanations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Translations_QuestionGroups_QuestionGroupId",
+                        column: x => x.QuestionGroupId,
+                        principalTable: "QuestionGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Translations_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "BotUserId", "CreatedAt", "CreatedBy", "Email", "EmailConfirmed", "FullName", "GoogleId", "IsDeleted", "PasswordHash", "Role", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1L, null, new DateTime(2026, 3, 24, 23, 5, 36, 459, DateTimeKind.Utc).AddTicks(7350), 1L, "ysharpist", false, "Abdurrohman", null, false, "$2a$11$xRA9ByZiowTpAoFBSRLLuOoWJpNI/XptZeLKcB2hqJYxiU822iCnO", 1, null, null });
+                values: new object[] { 1L, null, new DateTime(2026, 4, 8, 19, 11, 14, 573, DateTimeKind.Utc).AddTicks(3550), 1L, "ysharpist@gmail.com", false, "Abdurrohman", null, false, "$2a$11$UQWwfuKNfIgs0eIQgl8k.ewmEJ9yeZEc0lLyV8oXOhpQZgYAJu1hy", 1, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionGroupId",
@@ -256,6 +326,16 @@ namespace MilliyMock.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionId",
                 table: "Options",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionExplanations_QuestionGroupId",
+                table: "QuestionExplanations",
+                column: "QuestionGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QuestionExplanations_QuestionId",
+                table: "QuestionExplanations",
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
@@ -272,6 +352,21 @@ namespace MilliyMock.DataAccess.Migrations
                 name: "IX_Questions_TestId",
                 table: "Questions",
                 column: "TestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_QuestionExplanationId",
+                table: "Translations",
+                column: "QuestionExplanationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_QuestionGroupId",
+                table: "Translations",
+                column: "QuestionGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_QuestionId",
+                table: "Translations",
+                column: "QuestionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserAnswers_QuestionId",
@@ -314,7 +409,13 @@ namespace MilliyMock.DataAccess.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Translations");
+
+            migrationBuilder.DropTable(
                 name: "UserAnswers");
+
+            migrationBuilder.DropTable(
+                name: "QuestionExplanations");
 
             migrationBuilder.DropTable(
                 name: "Options");
