@@ -37,7 +37,7 @@ public class QuestionService(
                 var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
                 if (test is null) throw new MilliyMockException(404, "Test not found");
             }
-
+            
             if (dto.TextUz is not null && dto.TextRu is not null)
             {
                 string? imagePathUz = null;
@@ -188,6 +188,7 @@ public class QuestionService(
             .SelectAll(q => q.TestId == testId && !q.IsDeleted)
             .Include(q => q.Translations)
             .Include(q => q.Options)
+            .OrderBy(q => q.Order)
             .ToListAsync();
         return mapper.Map<List<QuestionResultDto>>(questions);
     }
