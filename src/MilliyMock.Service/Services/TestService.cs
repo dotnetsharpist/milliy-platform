@@ -62,7 +62,7 @@ public class TestService(
                 AttemptCount = unitOfWork.UserTestAttempts
                     .SelectAll()
                     .Count(a => a.TestId == test.Id),
-                TestStatus = test.Status
+                Status = test.Status
             })
             .ToListAsync();
     }
