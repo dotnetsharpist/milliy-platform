@@ -1,3 +1,5 @@
+using MilliyMock.Domain.Enums;
+
 namespace MilliyMock.Service.Dtos.Tests;
 
 public class TestResultDto
@@ -7,4 +9,5 @@ public class TestResultDto
     public string? Description { get; set; }
     public int QuestionCount { get; set; }
     public int AttemptCount { get; set; }
+    public TestStatus TestStatus { get; set; }
 }
