@@ -82,12 +82,12 @@ public class TestService(
         try
         {
             var test = await unitOfWork.Tests.SelectAll(t => t.Id == testId && !t.IsDeleted)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Options)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null)).ThenInclude(q => q.Translations)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
                 .FirstOrDefaultAsync();
             
             var groupedQuestions = await unitOfWork.QuestionGroups
-                .SelectAll(qg => qg.TestId == testId)
+                .SelectAll(qg => qg.TestId == testId && !qg.IsDeleted)
                 .Include(qg => qg.Translations)
                 .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
                 .Include(qg => qg.Options)
