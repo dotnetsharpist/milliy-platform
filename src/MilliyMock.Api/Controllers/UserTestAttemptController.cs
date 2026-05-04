@@ -17,12 +17,20 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
             Data = await service.CreateAsync(dto)
         });
     
-    [HttpGet]
+    [HttpGet("get-user-attempts")]
     [Authorize]
     public async Task<IActionResult> GetByUserId()
         => Ok(new Response
         {
             Data = await service.GetByUserId()
+        });
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetById([FromQuery] long testAttemptId)
+        => Ok(new Response
+        {
+            Data = await service.GetById(testAttemptId)
         });
 
     [HttpPost("submit")]

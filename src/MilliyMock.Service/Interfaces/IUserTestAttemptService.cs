@@ -9,5 +9,6 @@ public interface IUserTestAttemptService
     Task<AttemptedTestResultDto> SubmitTest(long testAttemptId);
     Task<bool> PauseTest(long testId);
     Task<List<UserTestAttemptResultDto>> GetByUserId();
-    Task<List<UserTestAttemptResultDto>> GetProgressAsync(long testId);
+    Task<UserTestAttemptResultDto> GetById(long testAttemptId);
+    Task<UserTestAttemptResultDto> GetProgressAsync(long testId);
 }

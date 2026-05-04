@@ -56,7 +56,7 @@ public class TestService(
                 Description = test.Description,
 
                 QuestionCount = unitOfWork.Questions
-                    .SelectAll()
+                    .SelectAll(q => !q.IsDeleted)
                     .Count(q => q.TestId == test.Id),
 
                 AttemptCount = unitOfWork.UserTestAttempts

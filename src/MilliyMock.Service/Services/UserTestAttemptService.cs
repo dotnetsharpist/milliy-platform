@@ -5,7 +5,9 @@ using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
+using MilliyMock.Service.Dtos.Questions;
 using MilliyMock.Service.Dtos.Tests;
+using MilliyMock.Service.Dtos.UserAnswers;
 using MilliyMock.Service.Dtos.UserTestAttempt;
 using MilliyMock.Service.Interfaces;
 using MilliyMock.Shared.Helpers;
@@ -161,7 +163,9 @@ public class UserTestAttemptService(
                 CorrectCount = correctCount,
                 IncorrectCount = incorrectCount,
                 MaxScore = maxScore,
-                TotalScore = totalScore
+                TotalScore = totalScore,
+                UserAnswers = mapper.Map<List<UserAnswerResultDto>>(testAttempt.UserAnswers),
+                Questions = mapper.Map<List<QuestionResultDto>>(questions)
             };
         }
         catch (MilliyMockException)
@@ -214,8 +218,8 @@ public class UserTestAttemptService(
             var userId = HttpContextHelper.UserId;
             if (userId is null) throw new MilliyMockException();
 
-            var attempt = await unitOfWork.UserTestAttempts.SelectAll(a => a.UserId == userId)
-                .Include(a => a.UserAnswers)
+            var attempt = await unitOfWork.UserTestAttempts
+                .SelectAll(a => a.UserId == userId && a.AttemptStatus == AttemptStatus.Completed)
                 .ToListAsync();
 
             return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
@@ -231,7 +235,35 @@ public class UserTestAttemptService(
         }
     }
 
-    public async Task<List<UserTestAttemptResultDto>> GetProgressAsync(long testId)
+    public async Task<UserTestAttemptResultDto> GetById(long testAttemptId)
+    {
+        try
+        {
+            logger.LogInformation("Retrieving full test attempt for {userId} and testAttempt {testAttemptId}",
+                HttpContextHelper.UserId, testAttemptId);
+
+            var attempt = await unitOfWork.UserTestAttempts.SelectAll(a =>
+                    a.Id == testAttemptId && a.AttemptStatus == AttemptStatus.Completed)
+                .Include(a => a.UserAnswers)
+                .FirstOrDefaultAsync();
+
+            if (attempt == null) throw new MilliyMockException(404, "Attempt not found");
+
+            return mapper.Map<UserTestAttemptResultDto>(attempt);
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error retrieving in-progress test attempts for user {userId} and test {testAttemptId}",
+                HttpContextHelper.UserId, testAttemptId);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<UserTestAttemptResultDto> GetProgressAsync(long testId)
     {
         try
         {
@@ -243,9 +275,9 @@ public class UserTestAttemptService(
             var attempt = await unitOfWork.UserTestAttempts.SelectAll(a =>
                     a.UserId == userId && a.TestId == testId && a.AttemptStatus != AttemptStatus.Completed)
                 .Include(a => a.UserAnswers)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
+            return mapper.Map<UserTestAttemptResultDto>(attempt);
         }
         catch (MilliyMockException)
         {

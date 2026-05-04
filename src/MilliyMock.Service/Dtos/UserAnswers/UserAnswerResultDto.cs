@@ -7,7 +7,6 @@ namespace MilliyMock.Service.Dtos.UserAnswers;
 public class UserAnswerResultDto
 {
     public long UserTestAttemptId { get; set; }
-    public UserTestAttemptResultDto UserTestAttempt { get; set; } = null!;
 
     public long QuestionId { get; set; }
     public QuestionResultDto Question { get; set; } = null!;

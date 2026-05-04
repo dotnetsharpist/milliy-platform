@@ -1,5 +1,6 @@
 using AutoMapper;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Service.Dtos.BotUsers;
 using MilliyMock.Service.Dtos.Options;
 using MilliyMock.Service.Dtos.QuestionExplanations;
 using MilliyMock.Service.Dtos.QuestionGroups;
@@ -86,5 +87,9 @@ public class MapperProfile : Profile
         CreateMap<UserAnswer, CreateUserAnswerDto>().ReverseMap();
         CreateMap<UpdateUserAnswerDto, UserAnswer>();
         CreateMap<UserAnswer, UserAnswerResultDto>().ReverseMap();
+        
+        // Bot user
+        CreateMap<BotUser, CreateBotUserDto>().ReverseMap();
+        CreateMap<BotUser, BotUserResultDto>().ReverseMap();
     }
 }
