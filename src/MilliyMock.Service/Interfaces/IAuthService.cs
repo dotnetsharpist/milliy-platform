@@ -5,6 +5,7 @@ namespace MilliyMock.Service.Interfaces;
 
 public interface IAuthService
 {
-    ValueTask<string> Register(CreateUserDto dto);
+    Task<string> Register(CreateUserDto dto);
+    Task<LoginResultDto> TelegramLogin(TelegramLoginDto dto);
     ValueTask<LoginResultDto> Login(LoginDto dto);
 }

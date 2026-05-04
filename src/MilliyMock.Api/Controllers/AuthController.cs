@@ -19,6 +19,16 @@ public class AuthController(IAuthService authService) : BaseController
             Message = "Ok👍🏿",
             Data = await authService.Login(dto)
         });
+
+    [HttpPost("telegram-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> TelegramLogin(TelegramLoginDto dto)
+        => Ok(new Response
+        {
+            Code = 200,
+            Message = "Ok👍🏿",
+            Data = await authService.TelegramLogin(dto)
+        });
     
     [HttpPost("register")]
     [AllowAnonymous]

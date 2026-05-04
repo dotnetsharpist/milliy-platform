@@ -2,9 +2,6 @@ namespace MilliyMock.Service.Dtos.Users;
 
 public class UpdateUserDto
 {
-    public required string FullName { get; set; }
-    public required string Email { get; set; }
-    public required string CurrentGrade { get; set; } // "11", "12", "Undergraduate", "Gap Year"
-    public required string Major { get; set; }
-    public bool WantsOpportunityNotifications { get; set; } = true;
+    public string FullName { get; set; } = null!;
+    public string? PasswordHash { get; set; }
 }

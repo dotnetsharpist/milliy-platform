@@ -8,12 +8,12 @@ using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.Auth;
 using MilliyMock.Service.Dtos.Users;
 using MilliyMock.Service.Interfaces;
-using MilliyMock.Service.Models;
 using MilliyMock.Shared.Helpers;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
+
 
 namespace MilliyMock.Service.Services;
 
@@ -25,11 +25,66 @@ public class AuthService(
 {
     private readonly IConfiguration _configuration = configuration.GetSection("Jwt");
 
-    public ValueTask<string> Register(CreateUserDto dto)
+    public Task<string> Register(CreateUserDto dto)
     {
         throw new MilliyMockException();
     }
-    
+
+    public async Task<LoginResultDto> TelegramLogin(TelegramLoginDto dto)
+    {
+        try
+        {
+            var authDate = DateTimeOffset.FromUnixTimeSeconds(dto.AuthDate);
+            if (DateTimeOffset.UtcNow - authDate > TimeSpan.FromMinutes(5))
+                throw new MilliyMockException(409, "Expired");
+
+            if (!ValidateTelegramData(dto)) throw new MilliyMockException(409, "Bruh");
+
+            logger.LogInformation("Login attempt via telegram with username {username}", dto.Username);
+            var user = await unitOfWork.Users.SelectAsync(u => u.BotUser != null && u.Id == dto.Id);
+
+            if (user is not null)
+                return new LoginResultDto
+                {
+                    Token = GenerateToken(user),
+                    User = mapper.Map<UserResultDto>(user)
+                };
+
+            var newBotUser = new BotUser
+            {
+                TgUserId = dto.Id,
+                Username = dto.Username,
+                FullName = $"{dto.FirstName} {dto.LastName}".Trim()
+
+            };
+            await unitOfWork.BotUsers.InsertAsync(newBotUser);
+
+            var newUser = new User
+            {
+                FullName = newBotUser.FullName,
+                BotUser = newBotUser
+            };
+            await unitOfWork.Users.InsertAsync(newUser);
+
+            await unitOfWork.SaveChangesAsync();
+
+            return new LoginResultDto
+            {
+                Token = GenerateToken(newUser),
+                User = mapper.Map<UserResultDto>(newUser)
+            };
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during telegram login for username {username}", dto.Username);
+            throw new MilliyMockException();
+        }
+    }
+
     public async ValueTask<LoginResultDto> Login(LoginDto dto)
     {
         try
@@ -81,5 +136,36 @@ public class AuthService(
             signingCredentials: keyCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    private bool ValidateTelegramData(TelegramLoginDto dto)
+    {
+        var botToken = configuration.GetValue<string>("BotConfiguration:BotToken");
+        var dataCheckDict = new SortedDictionary<string, string>
+        {
+            { "auth_date", dto.AuthDate.ToString() },
+            { "first_name", dto.FirstName ?? "" },
+            { "id", dto.Id.ToString() },
+            { "username", dto.Username ?? "" }
+        };
+
+        if (!string.IsNullOrEmpty(dto.LastName))
+            dataCheckDict.Add("last_name", dto.LastName);
+
+        if (!string.IsNullOrEmpty(dto.PhotoUrl))
+            dataCheckDict.Add("photo_url", dto.PhotoUrl);
+
+        var dataCheckString = string.Join("\n",
+            dataCheckDict.Select(kvp => $"{kvp.Key}={kvp.Value}")
+        );
+
+        using var sha256 = SHA256.Create();
+        var secretKey = sha256.ComputeHash(Encoding.UTF8.GetBytes(botToken));
+
+        using var hmac = new HMACSHA256(secretKey);
+        var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataCheckString));
+        var computedHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+        return computedHash == dto.Hash;
     }
 }

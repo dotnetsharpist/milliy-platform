@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using MilliyMock.Domain.Commons;
 using MilliyMock.Domain.Enums;
 
@@ -7,7 +6,7 @@ namespace MilliyMock.Domain.Entities;
 public class User : Auditable
 {
     public string FullName { get; set; } = null!;
-    public string Email { get; set; } = null!;
+    public string? Email { get; set; }
     public bool EmailConfirmed { get; set; } = false;
     public string? PasswordHash { get; set; }
     public string? GoogleId { get; set; }
