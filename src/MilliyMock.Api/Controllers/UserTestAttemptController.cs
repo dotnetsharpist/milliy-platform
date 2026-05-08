@@ -10,7 +10,7 @@ namespace MilliyMock.Controllers;
 public class UserTestAttemptController(IUserTestAttemptService service) : BaseController
 {
     [HttpPost]
-    [Authorize(Roles = "SuperAdmin,Admin")]
+    [Authorize]
     public async Task<IActionResult> CreateAsync(CreateUserTestAttemptDto dto)
         => Ok(new Response
         {
