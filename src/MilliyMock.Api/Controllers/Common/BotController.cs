@@ -5,7 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
-namespace MilliyMock.Controllers;
+namespace MilliyMock.Controllers.Common;
 
 [Route("api/bot")]
 public class BotController(

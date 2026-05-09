@@ -49,21 +49,21 @@ public class QuestionService(
                     imagePathRu = await fileService.UploadImage(dto.ImageRu);
                 }
 
-                var questionTranslationUz = new Translation()
+                var questionTranslationUz = new Translation
                 {
                     Language = Language.Uzbek,
                     Text = dto.TextUz,
                     ImagePath = imagePathUz,
                     Question = question
                 };
-                var questionTranslationRu = new Translation()
+                var questionTranslationRu = new Translation
                 {
                     Language = Language.Russian,
                     Text = dto.TextRu,
                     ImagePath = imagePathRu,
                     Question = question
                 };
-                question.Translations = new List<Translation>() { questionTranslationUz, questionTranslationRu };
+                question.Translations = new List<Translation> { questionTranslationUz, questionTranslationRu };
             }
             
             if (dto.Options is not null && dto.Options.Count > 0)
@@ -73,6 +73,32 @@ public class QuestionService(
                     option.CreatedBy = HttpContextHelper.UserId;
             }
 
+            var explanation = new QuestionExplanation
+            {
+                Question = question
+            };
+
+            await unitOfWork.QuestionExplanations.InsertAsync(explanation);
+
+            if (dto.Explanation is not null)
+            {
+                var translationUz = new Translation
+                {
+                    Text = dto.Explanation.TextUz,
+                    Language = Language.Uzbek,
+                    QuestionExplanation = explanation
+                };
+                
+                var translationRu = new Translation
+                {
+                    Text = dto.Explanation.TextRu,
+                    Language = Language.Russian,
+                    QuestionExplanation = explanation
+                };
+
+                explanation.Translations = new List<Translation> { translationUz, translationRu };
+            }
+            
             await unitOfWork.Questions.InsertAsync(question);
             return await unitOfWork.SaveChangesAsync();
         }

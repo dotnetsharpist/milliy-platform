@@ -1,11 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MilliyMock.Models;
 using MilliyMock.Service.Dtos.Auth;
 using MilliyMock.Service.Dtos.Users;
 using MilliyMock.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
-namespace MilliyMock.Controllers;
+namespace MilliyMock.Controllers.Web;
 
 [Route("api/auth")]
 public class AuthController(IAuthService authService) : BaseController

@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.QuestionExplanations;
 using MilliyMock.Service.Interfaces;
@@ -24,6 +25,22 @@ public class QuestionExplanationService(
 
             var questionExplanation = mapper.Map<QuestionExplanation>(dto);
             questionExplanation.CreatedBy = HttpContextHelper.UserId;
+            
+            var translationUz = new Translation
+            {
+                Language = Language.Uzbek,
+                Text = dto.TextUz,
+                Question = question
+            };
+            
+            var translationRu = new Translation
+            {
+                Language = Language.Russian,
+                Text = dto.TextRu,
+                Question = question
+            };
+
+            question.Translations = new List<Translation>() { translationUz, translationRu };
 
             await unitOfWork.QuestionExplanations.InsertAsync(questionExplanation);
             return await unitOfWork.SaveChangesAsync();

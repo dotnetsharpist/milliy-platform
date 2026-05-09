@@ -8,6 +8,7 @@ public class QuestionExplanation : Auditable
     public Question? Question { get; set; }
     public long? QuestionGroupId { get; set; }
     public QuestionGroup? QuestionGroup { get; set; }
-    
+
+    public string? VideoLink { get; set; }
     public ICollection<Translation> Translations { get; set; } = new List<Translation>();
 }

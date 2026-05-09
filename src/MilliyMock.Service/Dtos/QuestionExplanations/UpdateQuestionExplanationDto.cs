@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Http;
-
 namespace MilliyMock.Service.Dtos.QuestionExplanations;
 
 public class UpdateQuestionExplanationDto
 {
-    public string Text { get; set; } = null!;
-    public IFormFile? Image { get; set; }
+    public string TextUz { get; set; } = null!;
+    public string TextRu { get; set; } = null!;
+    public string? VideoLink { get; set; }
 }

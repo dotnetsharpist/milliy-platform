@@ -65,6 +65,7 @@
     </ItemGroup>
     
     <ItemGroup>
+      <Folder Include="Controllers\Admin\" />
       <Folder Include="wwwroot\images\" />
     </ItemGroup>
 

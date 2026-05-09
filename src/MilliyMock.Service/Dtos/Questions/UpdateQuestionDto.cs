@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using MilliyMock.Domain.Enums;
 using MilliyMock.Service.Dtos.Options;
+using MilliyMock.Service.Dtos.QuestionExplanations;
 
 namespace MilliyMock.Service.Dtos.Questions;
 
@@ -15,4 +16,5 @@ public class UpdateQuestionDto
     public QuestionType Type { get; set; }
     public string? CorrectAnswer { get; set; }
     public List<UpdateQuestionOptionDto>? Options { get; set; }
+    public UpdateQuestionExplanationDto? Explanation { get; set; }
 }
