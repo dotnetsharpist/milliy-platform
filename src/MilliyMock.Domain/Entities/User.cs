@@ -6,6 +6,9 @@ namespace MilliyMock.Domain.Entities;
 public class User : Auditable
 {
     public string FullName { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+    public string? LastName { get; set; }
+    public string? FatherName { get; set; }
     public string? Email { get; set; }
     public bool EmailConfirmed { get; set; } = false;
     public string? PasswordHash { get; set; }
