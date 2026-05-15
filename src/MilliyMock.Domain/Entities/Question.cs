@@ -12,6 +12,7 @@ public class Question : Auditable
     public Test Test { get; set; }
     public string? CorrectAnswer { get; set; }
     public long? QuestionGroupId { get; set; }
+    public QuestionExplanation QuestionExplanation { get; set; } = new();
     public QuestionGroup? QuestionGroups { get; set; }
     public ICollection<Translation> Translations { get; set; } = new List<Translation>();
     public ICollection<Option> Options { get; set; } = new List<Option>();

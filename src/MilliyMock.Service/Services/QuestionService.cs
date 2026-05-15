@@ -214,6 +214,7 @@ public class QuestionService(
             .SelectAll(q => q.TestId == testId && !q.IsDeleted)
             .Include(q => q.Translations)
             .Include(q => q.Options)
+            .Include(q => q.QuestionExplanation)
             .OrderBy(q => q.Order)
             .ToListAsync();
         return mapper.Map<List<QuestionResultDto>>(questions);

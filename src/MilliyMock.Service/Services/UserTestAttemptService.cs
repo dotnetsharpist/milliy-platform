@@ -77,10 +77,13 @@ public class UserTestAttemptService(
             var questions = await unitOfWork.Questions
                 .SelectAll(q => q.TestId == testAttempt.TestId)
                 .Include(q => q.Options)
-                .Include(q => q.QuestionGroups)
-                .ThenInclude(g => g.Options)
+                .Include(q => q.QuestionGroups).ThenInclude(g => g.Options)
+                .Include(q => q.QuestionGroups).ThenInclude(g => g.QuestionExplanation).ThenInclude(qe => qe.Translations)
+                .Include(q => q.QuestionExplanation).ThenInclude(qe => qe.Translations)
+                .Include(q => q.QuestionGroups).ThenInclude(g => g.QuestionExplanation)
+                .ThenInclude(qe => qe.Translations)
                 .ToListAsync();
-
+            
             decimal totalScore = 0;
             var correctCount = 0;
             var incorrectCount = 0;

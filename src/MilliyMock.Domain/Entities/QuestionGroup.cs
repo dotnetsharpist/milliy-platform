@@ -10,4 +10,5 @@ public class QuestionGroup : Auditable
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<Translation> Translations { get; set; } = new List<Translation>();
     public ICollection<Option> Options { get; set; } = new List<Option>();
+    public QuestionExplanation QuestionExplanation { get; set; } = new();
 }
