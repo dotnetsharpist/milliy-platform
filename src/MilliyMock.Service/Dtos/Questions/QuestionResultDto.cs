@@ -14,7 +14,7 @@ public class QuestionResultDto
     public string? CorrectAnswer { get; set; }
     public long? QuestionGroupId { get; set; }
 
-    public QuestionExplanationResultDto QuestionExplanation { get; set; } = new();
+    public QuestionExplanationResultDto? QuestionExplanation { get; set; }
     public List<TranslationResultDto> Translations { get; set; } = new();
     public List<OptionResultDto> Options { get; set; } = new();
 }

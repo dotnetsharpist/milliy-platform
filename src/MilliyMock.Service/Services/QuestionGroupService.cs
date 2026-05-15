@@ -120,6 +120,7 @@ public class QuestionGroupService(
             .Include(qg => qg.Translations)
             .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
             .Include(qg => qg.Questions).ThenInclude(q => q.Options)
+            .Include(qg => qg.QuestionExplanation).ThenInclude(qe => qe.Translations)
             .Include(qg => qg.Options)
             .FirstOrDefaultAsync();
 
@@ -135,6 +136,7 @@ public class QuestionGroupService(
             .Include(qg => qg.Translations)
             .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
             .Include(qg => qg.Questions).ThenInclude(q => q.Options)
+            .Include(qg => qg.QuestionExplanation).ThenInclude(qe => qe.Translations)
             .Include(qg => qg.Options)
             .ToListAsync();
 
