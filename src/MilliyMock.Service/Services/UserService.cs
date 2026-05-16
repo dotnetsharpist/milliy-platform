@@ -27,10 +27,11 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
         return true;
     }
 
-    public async ValueTask<bool> Update(long id, UpdateUserDto dto)
+    public async ValueTask<bool> Update(UpdateUserDto dto)
     {
+        var userId = HttpContextHelper.UserId ?? throw new MilliyMockException();
         var user = await unitOfWork.Users
-            .SelectAsync(u => u.Id == id);
+            .SelectAsync(u => u.Id == userId);
 
         if (HttpContextHelper.UserId != user.Id)
             throw new MilliyMockException(409, "nah");

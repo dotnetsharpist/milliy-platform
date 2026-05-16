@@ -7,5 +7,6 @@ public interface IQuestionService
     Task<bool> CreateAsync(CreateQuestionDto dto);
     Task<bool> UpdateAsync(long questionId, UpdateQuestionDto dto);
     Task<List<QuestionResultDto>> GetByTestIdAsync(long testId);
+    Task<QuestionResultDto> GetByIdAsync(long questionId);
     Task<bool> DeleteAsync(long questionId);
 }

@@ -220,6 +220,30 @@ public class QuestionService(
         return mapper.Map<List<QuestionResultDto>>(questions);
     }
 
+    public async Task<QuestionResultDto> GetByIdAsync(long questionId)
+    {
+        try
+        {
+            logger.LogInformation("Getting question with id {questionId}", questionId);
+            var question = await unitOfWork.Questions
+                .SelectAll(q => !q.IsDeleted && q.Id == questionId)
+                .Include(q => q.Options)
+                .Include(q => q.QuestionGroup).ThenInclude(g => g.Options)
+                .Include(q => q.QuestionGroup).ThenInclude(g => g.QuestionExplanation)
+                .ThenInclude(qe => qe.Translations)
+                .Include(q => q.QuestionExplanation).ThenInclude(qe => qe.Translations)
+                .FirstOrDefaultAsync();
+
+            return mapper.Map<QuestionResultDto>(question);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting question with id {questionId}", questionId);
+            throw new MilliyMockException();
+
+        }
+    }
+
     public async Task<bool> DeleteAsync(long questionId)
     {
         try

@@ -25,6 +25,15 @@ public class QuestionController(IQuestionService questionService) : BaseControll
             Data = await questionService.GetByTestIdAsync(testId)
         });
     
+    [HttpGet("{questionId}")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> GetByIdAsync(long questionId)
+        => Ok(new Response
+        {
+            Data = await questionService.GetByIdAsync(questionId)
+        });
+
+    
     [HttpDelete("{questionId}")]
     [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> DeleteAsync(long questionId)

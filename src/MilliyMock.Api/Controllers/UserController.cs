@@ -19,9 +19,9 @@ public class UserController(IUserService userService) : BaseController
 
     [HttpPut("{userId:long}")]
     [Authorize]
-    public async Task<IActionResult> Update(long userId, UpdateUserDto dto)
+    public async Task<IActionResult> Update(UpdateUserDto dto)
         => Ok(new Response
         {
-            Data = await userService.Update(userId, dto)
+            Data = await userService.Update(dto)
         });
 }
