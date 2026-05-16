@@ -228,9 +228,10 @@ public class QuestionService(
             var question = await unitOfWork.Questions
                 .SelectAll(q => !q.IsDeleted && q.Id == questionId)
                 .Include(q => q.Options)
+                .Include(q => q.Translations)
+                .Include(q => q.QuestionGroup).ThenInclude(g => g.Translations)
                 .Include(q => q.QuestionGroup).ThenInclude(g => g.Options)
-                .Include(q => q.QuestionGroup).ThenInclude(g => g.QuestionExplanation)
-                .ThenInclude(qe => qe.Translations)
+                .Include(q => q.QuestionGroup).ThenInclude(g => g.QuestionExplanation).ThenInclude(qe => qe.Translations)
                 .Include(q => q.QuestionExplanation).ThenInclude(qe => qe.Translations)
                 .FirstOrDefaultAsync();
 
