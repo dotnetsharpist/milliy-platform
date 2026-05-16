@@ -17,7 +17,7 @@ public class UserController(IUserService userService) : BaseController
             Data = await userService.GetMe()
         });
 
-    [HttpPut("{userId:long}")]
+    [HttpPut]
     [Authorize]
     public async Task<IActionResult> Update(UpdateUserDto dto)
         => Ok(new Response
