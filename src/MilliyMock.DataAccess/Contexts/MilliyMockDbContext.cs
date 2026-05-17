@@ -16,7 +16,7 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = 1, FullName = "Abdurrohman", FirstName = "Abdurrohman", Email = "ysharpist@gmail.com",
+                Id = 1, FirstName = "Abdurrohman", Email = "ysharpist@gmail.com",
                 PasswordHash = PasswordHelper.Hash("nigga"),
                 Role = UserRole.SuperAdmin, CreatedBy = 1
             }

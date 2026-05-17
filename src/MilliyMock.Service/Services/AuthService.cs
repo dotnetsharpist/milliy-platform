@@ -55,13 +55,13 @@ public class AuthService(
                 TgUserId = dto.Id,
                 Username = dto.Username,
                 FullName = $"{dto.FirstName} {dto.LastName}".Trim()
-
             };
             await unitOfWork.BotUsers.InsertAsync(newBotUser);
 
             var newUser = new User
             {
-                FullName = newBotUser.FullName,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName ?? "",
                 BotUser = newBotUser
             };
             await unitOfWork.Users.InsertAsync(newUser);
@@ -119,7 +119,7 @@ public class AuthService(
         var identityClaims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Name, user.FirstName),
             new Claim("Purpose", "accessToken"),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
