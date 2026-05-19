@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
@@ -98,7 +99,11 @@ public class QuestionExplanationService(
         try
         {
             logger.LogInformation("Getting question explanation for question with id {QuestionId}", questionId);
-            var questionExplanation = await unitOfWork.QuestionExplanations.SelectAsync(qe => qe.QuestionId == questionId);
+            var questionExplanation = await unitOfWork.QuestionExplanations
+                .SelectAll(qe => qe.QuestionId == questionId)
+                .Include(qe => qe.Translations)
+                .FirstOrDefaultAsync();
+            
             if (questionExplanation is null) throw new MilliyMockException(404, "Question explanation not found");
 
             return mapper.Map<QuestionExplanationResultDto>(questionExplanation);
