@@ -75,7 +75,7 @@ public class UserTestAttemptService(
 
             // Load questions with options
             var questions = await unitOfWork.Questions
-                .SelectAll(q => q.TestId == testAttempt.TestId)
+                .SelectAll(q => q.TestId == testAttempt.TestId && !q.IsDeleted)
                 .Include(q => q.Options)
                 .Include(q => q.Translations)
                 .Include(q => q.QuestionGroup).ThenInclude(qg => qg.Translations)
