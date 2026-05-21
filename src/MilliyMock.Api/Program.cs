@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Features;
 using MilliyMock.Configurations.Layers;
 using MilliyMock.Configurations;
 using MilliyMock.DataAccess.Contexts;
@@ -23,6 +24,16 @@ services.ConfigureSwagger();
 services.AddMemoryCache();
 services.AddHttpClient();
 services.AddHttpContextAccessor();
+
+services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024;
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
+});
 
 var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
 
