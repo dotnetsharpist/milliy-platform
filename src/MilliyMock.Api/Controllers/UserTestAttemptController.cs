@@ -34,8 +34,8 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         });
 
     [HttpPost("submit")]
-    [Authorize]
-    public async Task<IActionResult> SubmitAsync(long testId, long testAttemptId)
+    [AllowAnonymous]
+    public async Task<IActionResult> SubmitAsync(long testAttemptId)
         => Ok(new Response
         {
             Data = await service.SubmitTest(testAttemptId)
