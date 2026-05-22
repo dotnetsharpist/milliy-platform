@@ -6,6 +6,7 @@ using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.Questions;
+using MilliyMock.Service.Dtos.TempUsers;
 using MilliyMock.Service.Dtos.Tests;
 using MilliyMock.Service.Dtos.UserAnswers;
 using MilliyMock.Service.Dtos.UserTestAttempt;
@@ -24,20 +25,30 @@ public class UserTestAttemptService(
         try
         {
             logger.LogInformation("Creating test attempt for test {testId}", dto.TestId);
-            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+            
+            var userId = dto.TempUserId is not null
+                ? null
+                : HttpContextHelper.UserId;
 
+            if (userId is null && dto.TempUserId is null)
+                throw new MilliyMockException(409, "Unauthorized");
+
+            /*
             var ongoingAttempt = await unitOfWork.UserTestAttempts
                 .SelectAsync(a =>
                     a.UserId == userId && a.TestId == dto.TestId && a.AttemptStatus != AttemptStatus.Completed);
+                    
 
-            //if (ongoingAttempt != null)
-                //throw new MilliyMockException(409, "Already have an active test twin.");
+            if (ongoingAttempt != null)
+                throw new MilliyMockException(409, "Already have an active test twin.");
+            */
 
             var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
             if (test is null) throw new MilliyMockException(404, "Test not found");
 
             var attempt = mapper.Map<UserTestAttempt>(dto);
             attempt.UserId = userId;
+            attempt.TempUserId = dto.TempUserId;
 
             await unitOfWork.UserTestAttempts.InsertAsync(attempt);
             await unitOfWork.UserTestAttempts.SaveAsync();
@@ -60,11 +71,12 @@ public class UserTestAttemptService(
         try
         {
             logger.LogInformation("Submitting test attempt for testAttemptId {testAttemptId}", testAttemptId);
-            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+            //var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
             var testAttempt = await unitOfWork.UserTestAttempts
-                .SelectAll(ta => ta.Id == testAttemptId && ta.UserId == userId)
+                .SelectAll(ta => ta.Id == testAttemptId /*&& ta.UserId == userId*/)
                 .Include(ta => ta.UserAnswers)
+                .Include(ta => ta.TempUser)
                 .FirstOrDefaultAsync();
 
             if (testAttempt is null)
@@ -167,6 +179,7 @@ public class UserTestAttemptService(
                 IncorrectCount = incorrectCount,
                 MaxScore = maxScore,
                 TotalScore = totalScore,
+                TempUser = mapper.Map<TempUserResultDto>(testAttempt.TempUser),
                 UserAnswers = mapper.Map<List<UserAnswerResultDto>>(testAttempt.UserAnswers),
                 Questions = mapper.Map<List<QuestionResultDto>>(questions)
             };
@@ -211,7 +224,6 @@ public class UserTestAttemptService(
             throw new MilliyMockException();
         }
     }
-
 
     public async Task<List<UserTestAttemptResultDto>> GetByUserId()
     {
