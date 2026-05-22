@@ -29,10 +29,10 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
         //var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
         var userAnswer = await unitOfWork.UserAnswer
-            .SelectAll(ua => ua.QuestionId == dto.QuestionId)
+            .SelectAll(ua => ua.QuestionId == dto.QuestionId && ua.UserTestAttemptId == dto.UserTestAttemptId)
             .Include(ua => ua.UserTestAttempt)
             .FirstOrDefaultAsync();
-        if (userAnswer is null) return false;
+        if (userAnswer is null) throw new MilliyMockException(404, "User answer not found");
         
         //if (userId != userAnswer.UserTestAttempt.UserId)
             //throw new MilliyMockException(401, "UnAuthorized");

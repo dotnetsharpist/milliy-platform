@@ -26,7 +26,7 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         });
 
     [HttpGet]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById([FromQuery] long testAttemptId)
         => Ok(new Response
         {
@@ -41,16 +41,8 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
             Data = await service.SubmitTest(testAttemptId)
         });
     
-    [HttpPost("pause")]
-    [Authorize]
-    public async Task<IActionResult> PauseAsync(long testId)
-        => Ok(new Response
-        {
-            Data = await service.PauseTest(testId)
-        });
-
     [HttpGet("get-progress")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetProgress(long testId)
         => Ok(new Response
         {
