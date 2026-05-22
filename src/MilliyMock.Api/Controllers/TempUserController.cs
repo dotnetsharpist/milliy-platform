@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MilliyMock.Models;
 using MilliyMock.Service.Dtos.TempUsers;
@@ -8,6 +9,8 @@ namespace MilliyMock.Controllers;
 [Route("api/temp-user")]
 public class TempUserController(ITempUserService service) : BaseController
 {
+    [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> CreateAsync(CreateTempUserDto dto)
         => Ok(new Response
         {
