@@ -10,7 +10,7 @@ namespace MilliyMock.Controllers;
 public class UserAnswerController(IUserAnswerService answerService) : BaseController
 {
     [HttpPost]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> CreateAsync(CreateUserAnswerDto dto)
         => Ok(new Response
         {
@@ -18,7 +18,7 @@ public class UserAnswerController(IUserAnswerService answerService) : BaseContro
         });
     
     [HttpPut]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> UpdateAsync(UpdateUserAnswerDto dto)
         => Ok(new Response
         {

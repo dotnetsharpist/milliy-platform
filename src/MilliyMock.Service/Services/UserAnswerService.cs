@@ -26,7 +26,7 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
 
     public async Task<bool> UpdateAsync(UpdateUserAnswerDto dto)
     {
-        var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+        //var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
         var userAnswer = await unitOfWork.UserAnswer
             .SelectAll(ua => ua.QuestionId == dto.QuestionId)
@@ -34,8 +34,8 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
             .FirstOrDefaultAsync();
         if (userAnswer is null) return false;
         
-        if (userId != userAnswer.UserTestAttempt.UserId)
-            throw new MilliyMockException(401, "UnAuthorized");
+        //if (userId != userAnswer.UserTestAttempt.UserId)
+            //throw new MilliyMockException(401, "UnAuthorized");
 
         userAnswer = mapper.Map<UserAnswer>(dto);
         return await unitOfWork.UserAnswer.SaveAsync();
