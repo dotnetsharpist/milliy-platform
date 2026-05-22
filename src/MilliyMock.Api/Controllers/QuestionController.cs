@@ -11,6 +11,7 @@ public class QuestionController(IQuestionService questionService) : BaseControll
 {
     [HttpPost]
     [Authorize(Roles = "SuperAdmin,Admin")]
+    [RequestSizeLimit(104857600)]
     public async Task<IActionResult> CreateAsync([FromForm] CreateQuestionDto dto)
         => Ok(new Response
         {
