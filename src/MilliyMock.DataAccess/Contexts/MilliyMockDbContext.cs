@@ -17,13 +17,14 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             new User
             {
                 Id = 1, FirstName = "Abdurrohman", Email = "ysharpist@gmail.com",
-                PasswordHash = PasswordHelper.Hash("nigga"),
+                PasswordHash = PasswordHelper.Hash("milliymockadmin3"),
                 Role = UserRole.SuperAdmin, CreatedBy = 1
             }
         );
     }
     
     public DbSet<User> Users { get; init; }
+    public DbSet<TempUser> TempUsers { get; init; }
     public DbSet<BotUser> BotUsers { get; init; }
     public DbSet<Test> Tests { get; init; }
     public DbSet<QuestionGroup> QuestionGroups { get; init; }

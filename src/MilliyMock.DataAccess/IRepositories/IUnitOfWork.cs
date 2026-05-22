@@ -5,6 +5,7 @@ namespace MilliyMock.DataAccess.IRepositories;
 public interface IUnitOfWork : IDisposable
 {
     IRepository<User> Users { get; }
+    IRepository<TempUser> TempUsers { get; }
     IRepository<BotUser> BotUsers { get; }
     IRepository<Test> Tests { get; }
     IRepository<QuestionGroup> QuestionGroups { get; }

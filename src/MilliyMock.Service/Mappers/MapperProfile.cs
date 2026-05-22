@@ -5,6 +5,7 @@ using MilliyMock.Service.Dtos.Options;
 using MilliyMock.Service.Dtos.QuestionExplanations;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Questions;
+using MilliyMock.Service.Dtos.TempUsers;
 using MilliyMock.Service.Dtos.Tests;
 using MilliyMock.Service.Dtos.UserAnswers;
 using MilliyMock.Service.Dtos.Users;
@@ -21,6 +22,8 @@ public class MapperProfile : Profile
         CreateMap<User, UserResultDto>().ReverseMap();
         CreateMap<User, UpdateUserDto>().ReverseMap();
         
+        CreateMap<TempUser, CreateTempUserDto>().ReverseMap();
+        CreateMap<TempUser, TempUserResultDto>().ReverseMap();
         
         // Test
         CreateMap<Test, CreateTestDto>().ReverseMap();

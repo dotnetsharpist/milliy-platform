@@ -12,6 +12,7 @@ public class UnitOfWork(MilliyMockDbContext dbContext) : IUnitOfWork
     }
 
     public IRepository<User> Users { get; } = new Repository<User>(dbContext);
+    public IRepository<TempUser> TempUsers { get; } = new Repository<TempUser>(dbContext);
     public IRepository<BotUser> BotUsers { get; } = new Repository<BotUser>(dbContext);
     public IRepository<Test> Tests { get; } = new Repository<Test>(dbContext);
     public IRepository<QuestionGroup> QuestionGroups { get; } = new Repository<QuestionGroup>(dbContext);

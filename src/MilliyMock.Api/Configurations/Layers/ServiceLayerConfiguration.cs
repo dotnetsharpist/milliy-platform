@@ -17,6 +17,7 @@ public static class ServiceLayerConfiguration
         
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<ITempUserService, TempUserService>();
         builder.Services.AddScoped<ITestService, TestService>();
         builder.Services.AddScoped<IQuestionGroupService, QuestionGroupService>();
         builder.Services.AddScoped<IQuestionService, QuestionService>();
