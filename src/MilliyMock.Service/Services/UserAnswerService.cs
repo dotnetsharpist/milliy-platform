@@ -32,12 +32,14 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
             .SelectAll(ua => ua.QuestionId == dto.QuestionId && ua.UserTestAttemptId == dto.UserTestAttemptId)
             .Include(ua => ua.UserTestAttempt)
             .FirstOrDefaultAsync();
+        
         if (userAnswer is null) throw new MilliyMockException(404, "User answer not found");
         
         //if (userId != userAnswer.UserTestAttempt.UserId)
             //throw new MilliyMockException(401, "UnAuthorized");
 
         userAnswer = mapper.Map<UserAnswer>(dto);
+        unitOfWork.UserAnswer.Update(userAnswer);
         return await unitOfWork.UserAnswer.SaveAsync();
     }
 }
