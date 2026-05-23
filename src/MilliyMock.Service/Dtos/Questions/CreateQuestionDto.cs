@@ -8,9 +8,7 @@ namespace MilliyMock.Service.Dtos.Questions;
 public class CreateQuestionDto
 {
     public string? TextUz { get; set; }
-    public string? TextRu { get; set; }
     public IFormFile? ImageUz { get; set; }
-    public IFormFile? ImageRu { get; set; }
     public int Order { get; set; }
     public decimal Score { get; set; }
     public QuestionType Type { get; set; }

@@ -38,15 +38,15 @@ public class QuestionService(
                 if (test is null) throw new MilliyMockException(404, "Test not found");
             }
             
-            if (dto.TextUz is not null && dto.TextRu is not null)
+            if (dto.TextUz is not null)
             {
                 string? imagePathUz = null;
                 string? imagePathRu = null;
                 
-                if (dto.ImageUz is not null && dto.ImageRu is not null)
+                if (dto.ImageUz is not null)
                 {
                     imagePathUz = await fileService.UploadImage(dto.ImageUz);
-                    imagePathRu = await fileService.UploadImage(dto.ImageRu);
+                    //imagePathRu = await fileService.UploadImage(dto.ImageRu);
                 }
 
                 var questionTranslationUz = new Translation
@@ -59,7 +59,7 @@ public class QuestionService(
                 var questionTranslationRu = new Translation
                 {
                     Language = Language.Russian,
-                    Text = dto.TextRu,
+                    Text = dto.TextUz,
                     ImagePath = imagePathRu,
                     Question = question
                 };
@@ -119,13 +119,46 @@ public class QuestionService(
                 .SelectAll(q => q.Id == questionId && !q.IsDeleted)
                 .Include(q => q.Translations)
                 .Include(q => q.Options)
+                .Include(qe => qe.QuestionExplanation).ThenInclude(qe => qe.Translations)
                 .FirstOrDefaultAsync();
 
             if (question is null) throw new MilliyMockException(404, "Question not found");
 
             // --- update translations ---
             await UpdateTranslationAsync(question, Language.Uzbek, dto.TextUz, dto.ImageUz);
-            await UpdateTranslationAsync(question, Language.Russian, dto.TextRu, dto.ImageRu);
+            await UpdateTranslationAsync(question, Language.Russian, dto.TextUz, dto.ImageUz);
+            
+            // update question explanations
+            if (dto.Explanation is not null)
+            {
+                if (question.QuestionExplanation is null)
+                {
+                    var explanation = new QuestionExplanation { Question = question };
+                    question.QuestionExplanation = explanation;
+                    await unitOfWork.QuestionExplanations.InsertAsync(explanation);
+                    
+                    var explanationTranslationUz = new Translation
+                    {
+                        Language = Language.Uzbek,
+                        Text = dto.Explanation.TextUz,
+                        QuestionExplanation = explanation
+                    };
+                    
+                    var explanationTranslationRu = new Translation
+                    {
+                        Language = Language.Russian,
+                        Text = dto.Explanation.TextUz,
+                        QuestionExplanation = explanation
+                    };
+                    explanation.Translations = new List<Translation> { explanationTranslationUz, explanationTranslationRu };
+
+                }
+                else
+                {
+                    await UpdateQuestionExplanationTranslationAsync(question.QuestionExplanation, Language.Uzbek, dto.Explanation.TextUz);
+                    await UpdateQuestionExplanationTranslationAsync(question.QuestionExplanation, Language.Russian, dto.Explanation.TextUz);
+                }
+            }
 
             // --- update options ---
             if (dto.Options is not null)
@@ -183,6 +216,19 @@ public class QuestionService(
             logger.LogError(ex, "Error updating question with id {questionId}", questionId);
             throw new MilliyMockException();
         }
+    }
+
+    private async Task UpdateQuestionExplanationTranslationAsync(QuestionExplanation explanation, Language language,
+        string newText)
+    {
+        var translation = explanation.Translations.FirstOrDefault(t => t.Language == language);
+        if (translation is null)
+        {
+            translation = new Translation { Language = language, QuestionExplanation = explanation, Text = newText };
+            explanation.Translations.Add(translation);
+        }
+        
+        else translation.Text = newText;
     }
 
     private async Task UpdateTranslationAsync(Question question, Language language, string? newText, IFormFile? newImage)

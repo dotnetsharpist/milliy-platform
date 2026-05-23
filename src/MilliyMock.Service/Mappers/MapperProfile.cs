@@ -51,7 +51,7 @@ public class MapperProfile : Profile
         // Question
         CreateMap<Question, CreateQuestionDto>()
             .ForMember(dest => dest.ImageUz, opt => opt.Ignore())
-            .ForMember(dest => dest.ImageRu, opt => opt.Ignore())
+            //.ForMember(dest => dest.ImageRu, opt => opt.Ignore())
             .ReverseMap();
         CreateMap<UpdateQuestionDto, Question>()
             .ForMember(dest => dest.Options, opt => opt.Ignore())
