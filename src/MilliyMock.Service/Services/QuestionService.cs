@@ -31,18 +31,18 @@ public class QuestionService(
                 if (questionGroup is null) throw new MilliyMockException(404, "Question group not found");
                 question.TestId = questionGroup.TestId;
             }
-            
+
             else
             {
                 var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
                 if (test is null) throw new MilliyMockException(404, "Test not found");
             }
-            
+
             if (dto.TextUz is not null)
             {
                 string? imagePathUz = null;
                 string? imagePathRu = null;
-                
+
                 if (dto.ImageUz is not null)
                 {
                     imagePathUz = await fileService.UploadImage(dto.ImageUz);
@@ -65,7 +65,7 @@ public class QuestionService(
                 };
                 question.Translations = new List<Translation> { questionTranslationUz, questionTranslationRu };
             }
-            
+
             if (dto.Options is not null && dto.Options.Count > 0)
             {
                 question.Options = mapper.Map<List<Option>>(dto.Options);
@@ -88,7 +88,7 @@ public class QuestionService(
                     Language = Language.Uzbek,
                     QuestionExplanation = explanation
                 };
-                
+
                 var translationRu = new Translation
                 {
                     Text = dto.Explanation.TextRu,
@@ -98,9 +98,13 @@ public class QuestionService(
 
                 explanation.Translations = new List<Translation> { translationUz, translationRu };
             }
-            
+
             await unitOfWork.Questions.InsertAsync(question);
             return await unitOfWork.SaveChangesAsync();
+        }
+        catch (MilliyMockException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -260,7 +264,7 @@ public class QuestionService(
             .SelectAll(q => q.TestId == testId && !q.IsDeleted)
             .Include(q => q.Translations)
             .Include(q => q.Options)
-            .Include(q => q.QuestionExplanation)
+            .Include(q => q.QuestionExplanation).ThenInclude(qe => qe.Translations)
             .OrderBy(q => q.Order)
             .ToListAsync();
         return mapper.Map<List<QuestionResultDto>>(questions);

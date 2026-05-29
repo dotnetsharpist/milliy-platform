@@ -40,6 +40,7 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
             throw new MilliyMockException(404, "User not found");
         
         mapper.Map(dto, user);
+        unitOfWork.Users.Update(user);
 
         await unitOfWork.SaveChangesAsync();
         return true;
