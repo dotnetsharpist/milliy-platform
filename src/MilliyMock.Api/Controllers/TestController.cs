@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MilliyMock.Domain.Enums;
 using MilliyMock.Models;
 using MilliyMock.Service.Dtos.Tests;
 using MilliyMock.Service.Interfaces;
@@ -36,10 +37,10 @@ public class TestController(ITestService testService) : BaseController
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] SubjectType? subject)
         => Ok(new Response
         {
-            Data = await testService.GetAllAsync()
+            Data = await testService.GetAllAsync(subject)
         });
     
     /*

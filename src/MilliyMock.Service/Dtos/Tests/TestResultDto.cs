@@ -10,4 +10,5 @@ public class TestResultDto
     public int QuestionCount { get; set; }
     public int AttemptCount { get; set; }
     public TestStatus Status { get; set; }
+    public SubjectType Subject { get; set; }
 }

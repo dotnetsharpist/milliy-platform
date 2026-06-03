@@ -1,7 +1,9 @@
+using System.Linq.Expressions;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Enums;
 using MilliyMock.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
+using MilliyMock.Domain.Commons;
 
 namespace MilliyMock.DataAccess.Contexts;
 
@@ -9,6 +11,15 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(Auditable).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasQueryFilter(BuildIsDeletedFilter(entityType.ClrType));
+            }
+        }
+
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
@@ -22,6 +33,18 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             }
         );
     }
+    
+    
+    private static LambdaExpression BuildIsDeletedFilter(Type type)
+    {
+        var param = Expression.Parameter(type, "e");
+        var body = Expression.Equal(
+            Expression.Property(param, nameof(Auditable.IsDeleted)),
+            Expression.Constant(false)
+        );
+        return Expression.Lambda(body, param);
+    }
+
     
     public DbSet<User> Users { get; init; }
     public DbSet<TempUser> TempUsers { get; init; }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MilliyMock.DataAccess.Contexts;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MilliyMock.DataAccess.Migrations
 {
     [DbContext(typeof(MilliyMockDbContext))]
-    partial class MilliyMockDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260531175423_AddSubjectType")]
+    partial class AddSubjectType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BotUsers", (string)null);
+                    b.ToTable("BotUsers");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Option", b =>
@@ -102,7 +105,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Options", (string)null);
+                    b.ToTable("Options");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Question", b =>
@@ -152,7 +155,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("TestId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionExplanation", b =>
@@ -195,7 +198,7 @@ namespace MilliyMock.DataAccess.Migrations
                     b.HasIndex("QuestionId")
                         .IsUnique();
 
-                    b.ToTable("QuestionExplanations", (string)null);
+                    b.ToTable("QuestionExplanations");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.QuestionGroup", b =>
@@ -228,7 +231,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("TestId");
 
-                    b.ToTable("QuestionGroups", (string)null);
+                    b.ToTable("QuestionGroups");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.TempUser", b =>
@@ -268,7 +271,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TempUsers", (string)null);
+                    b.ToTable("TempUsers");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Test", b =>
@@ -309,7 +312,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tests", (string)null);
+                    b.ToTable("Tests");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Translation", b =>
@@ -362,7 +365,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Translations", (string)null);
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.User", b =>
@@ -423,7 +426,7 @@ namespace MilliyMock.DataAccess.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
@@ -483,7 +486,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("UserTestAttemptId");
 
-                    b.ToTable("UserAnswers", (string)null);
+                    b.ToTable("UserAnswers");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.UserTestAttempt", b =>
@@ -541,7 +544,7 @@ namespace MilliyMock.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTestAttempts", (string)null);
+                    b.ToTable("UserTestAttempts");
                 });
 
             modelBuilder.Entity("MilliyMock.Domain.Entities.Option", b =>

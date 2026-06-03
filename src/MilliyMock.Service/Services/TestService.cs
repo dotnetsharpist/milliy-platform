@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
+using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Tests;
@@ -45,10 +46,14 @@ public class TestService(
         return await unitOfWork.Tests.SaveAsync();
     }
 
-    public async Task<List<TestResultDto>> GetAllAsync()
+    public async Task<List<TestResultDto>> GetAllAsync(SubjectType? subject)
     {
+        var userRole = HttpContextHelper.UserRole;
+
         return await unitOfWork.Tests
             .SelectAll(t => !t.IsDeleted)
+            .Where(t => subject == null || t.Subject == subject)
+            .Where(t => userRole != "Admin" && userRole != "SuperAdmin" ? t.Status == TestStatus.Published : true)
             .Select(test => new TestResultDto
             {
                 Id = test.Id,
@@ -56,17 +61,27 @@ public class TestService(
                 Description = test.Description,
 
                 QuestionCount = unitOfWork.Questions
-                    .SelectAll()
-                    .Count(q => !q.IsDeleted && q.TestId == test.Id),
+                                    .SelectAll()
+                                    .Where(q => !q.IsDeleted && q.TestId == test.Id)
+                                    .Where(q => !(q.QuestionGroupId != null && q.Type == QuestionType.FreeAnswer))
+                                    .Count()
+                                +
+                                unitOfWork.Questions
+                                    .SelectAll()
+                                    .Where(q => !q.IsDeleted && q.TestId == test.Id)
+                                    .Where(q => q.QuestionGroupId != null && q.Type == QuestionType.FreeAnswer)
+                                    .Select(q => q.QuestionGroupId)
+                                    .Distinct()
+                                    .Count(),
 
                 AttemptCount = unitOfWork.UserTestAttempts
                     .SelectAll()
                     .Count(a => a.TestId == test.Id),
+
                 Status = test.Status
             })
             .ToListAsync();
     }
-
     public async Task<TestResultDto> GetByIdAsync(long testId)
     {
         var test = await unitOfWork.Tests.SelectAsync(t => t.Id == testId && !t.IsDeleted);
