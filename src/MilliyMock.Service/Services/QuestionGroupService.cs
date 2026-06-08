@@ -66,8 +66,41 @@ public class QuestionGroupService(
                 }
             }
 
+            if (dto.Options is not null && dto.Options.Count > 0)
+            {
+                questionGroup.Options = mapper.Map<List<Option>>(dto.Options);
+                foreach (var option in questionGroup.Options)
+                    option.CreatedBy = HttpContextHelper.UserId;
+            }
+
+
+            var explanation = new QuestionExplanation
+            {
+                QuestionGroup = questionGroup
+            };
+
+            if (dto.Explanation is not null)
+            {
+                var translationUz = new Translation
+                {
+                    Text = dto.Explanation.TextUz,
+                    Language = Language.Uzbek,
+                    QuestionExplanation = explanation
+                };
+
+                var translationRu = new Translation
+                {
+                    Text = dto.Explanation.TextRu,
+                    Language = Language.Russian,
+                    QuestionExplanation = explanation
+                };
+
+                explanation.Translations = new List<Translation> { translationUz, translationRu };
+            }
+
+
             await unitOfWork.QuestionGroups.InsertAsync(questionGroup);
-            return await unitOfWork.QuestionGroups.SaveAsync();
+            return await unitOfWork.SaveChangesAsync();
         }
         catch (MilliyMockException)
         {

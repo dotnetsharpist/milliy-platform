@@ -17,6 +17,14 @@ public class QuestionController(IQuestionService questionService) : BaseControll
         {
             Data = await questionService.CreateAsync(dto)
         });
+    
+    [HttpPost("bulk")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    public async Task<IActionResult> CreateManyAsync([FromForm] CreateManyQuestionsDto dto)
+        => Ok(new Response
+        {
+            Data = await questionService.CreateManyAsync(dto)
+        });
 
     [HttpGet]
     [Authorize]
