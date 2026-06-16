@@ -22,6 +22,8 @@ public class UnitOfWork(MilliyMockDbContext dbContext) : IUnitOfWork
     public IRepository<Option> Options { get; } = new Repository<Option>(dbContext);
     public IRepository<UserTestAttempt> UserTestAttempts { get; } = new Repository<UserTestAttempt>(dbContext);
     public IRepository<UserAnswer> UserAnswer { get; } = new Repository<UserAnswer>(dbContext);
+    public IRepository<UserBalance> UserBalances { get; } = new Repository<UserBalance>(dbContext);
+    public IRepository<TransactionHistory> TransactionHistories { get; } = new Repository<TransactionHistory>(dbContext);
 
     public async Task<bool> SaveChangesAsync()
     {

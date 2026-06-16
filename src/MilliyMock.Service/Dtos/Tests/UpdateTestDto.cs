@@ -8,4 +8,6 @@ public class UpdateTestDto
     public string? Description { get; set; }
     public TestStatus? Status { get; set; }
     public SubjectType? Subject { get; set; }
+    public bool IsPremium { get; set; }
+    public int Price { get; set; }
 }

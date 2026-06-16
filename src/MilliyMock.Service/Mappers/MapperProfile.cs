@@ -7,7 +7,9 @@ using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Questions;
 using MilliyMock.Service.Dtos.TempUsers;
 using MilliyMock.Service.Dtos.Tests;
+using MilliyMock.Service.Dtos.TransactionHistories;
 using MilliyMock.Service.Dtos.UserAnswers;
+using MilliyMock.Service.Dtos.UserBalances;
 using MilliyMock.Service.Dtos.Users;
 using MilliyMock.Service.Dtos.UserTestAttempt;
 
@@ -90,5 +92,9 @@ public class MapperProfile : Profile
         // Bot user
         CreateMap<BotUser, CreateBotUserDto>().ReverseMap();
         CreateMap<BotUser, BotUserResultDto>().ReverseMap();
+
+        // Balance & Transactions
+        CreateMap<UserBalance, UserBalanceResultDto>().ReverseMap();
+        CreateMap<TransactionHistory, TransactionHistoryResultDto>().ReverseMap();
     }
 }

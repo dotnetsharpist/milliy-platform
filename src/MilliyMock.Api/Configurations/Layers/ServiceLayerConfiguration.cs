@@ -27,6 +27,8 @@ public static class ServiceLayerConfiguration
         builder.Services.AddScoped<IBotUserService, BotUserService>();
         builder.Services.AddScoped<IFileService, FileService>();
         builder.Services.AddScoped<IQuestionExplanationService, QuestionExplanationService>();
+        builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
+        builder.Services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
         builder.Services.AddScoped<IUpdateHandler, UpdateHandler>();
         builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
             httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));

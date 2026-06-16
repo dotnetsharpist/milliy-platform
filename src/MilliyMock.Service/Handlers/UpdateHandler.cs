@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using MilliyMock.Domain.Exceptions;
 using MilliyMock.Service.Dtos.BotUsers;
 using MilliyMock.Service.Interfaces;
 using Telegram.Bot;
@@ -45,13 +46,27 @@ public class UpdateHandler(ITelegramBotClient bot,
         
         var dto = mapper.Map<CreateBotUserDto>(msg.From);
         await botUserService.CreateAsync(dto);
-
+        
         if (msg.Text is not { } messageText)
             return;
+        
+        await (messageText.Split(' ')[0] switch
+        {
+            //"/start" => OnStart(),
+            "/addbalance" => AddBalance(msg),
+            _ => Usage(msg)
+        });
 
-        var userId = msg.Chat.Id;
+        //var userId = msg.Chat.Id;
+    }
+
+    private async Task AddBalance(Message msg)
+    {
+        var responseText = await botUserService.AddBalanceViaBotAsync(msg.Text!);
+        await bot.SendMessage(msg!.From!.Id, responseText);
     }
     
+    /*
     private async Task MenuControl(Message msg)
     {
         if (msg.Text is not { } messageText)
@@ -62,13 +77,13 @@ public class UpdateHandler(ITelegramBotClient bot,
             _ => Usage(msg)
         });
     }
+    */
     
  #region Usages
 
  async Task<Message> Usage(Message msg)
  {
      return await bot.SendMessage(msg.Chat, "nigga");
-
  }
  
  #endregion    

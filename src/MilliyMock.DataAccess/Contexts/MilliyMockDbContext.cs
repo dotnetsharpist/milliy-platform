@@ -23,7 +23,15 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
-        
+
+        modelBuilder.Entity<BotUser>()
+            .HasIndex(bu => bu.TgUserId)
+            .IsUnique();
+
+        modelBuilder.Entity<UserBalance>()
+            .HasIndex(b => b.UserId)
+            .IsUnique();
+
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
             {
@@ -57,4 +65,6 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Option> Options { get; init; }
     public DbSet<UserTestAttempt> UserTestAttempts { get; init; }
     public DbSet<UserAnswer> UserAnswers { get; init; }
+    public DbSet<UserBalance> UserBalances { get; init; }
+    public DbSet<TransactionHistory> TransactionHistories { get; init; }
 }

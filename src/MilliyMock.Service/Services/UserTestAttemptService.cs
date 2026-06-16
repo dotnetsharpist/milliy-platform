@@ -46,6 +46,18 @@ public class UserTestAttemptService(
             var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
             if (test is null) throw new MilliyMockException(404, "Test not found");
 
+            if (test.IsPremium)
+            {
+                var purchased = await unitOfWork.TransactionHistories
+                    .SelectAll(th => th.UserId == userId
+                                     && th.TestId == dto.TestId
+                                     && th.Type == BalanceTransactionType.Purchase)
+                    .AnyAsync();
+
+                if (!purchased)
+                    throw new MilliyMockException(402, "This is a premium test. Please purchase it to continue.");
+            }
+
             var attempt = mapper.Map<UserTestAttempt>(dto);
             attempt.UserId = userId;
             attempt.TempUserId = dto.TempUserId;

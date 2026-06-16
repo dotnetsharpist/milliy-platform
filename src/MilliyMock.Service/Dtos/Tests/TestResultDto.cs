@@ -11,4 +11,12 @@ public class TestResultDto
     public int AttemptCount { get; set; }
     public TestStatus Status { get; set; }
     public SubjectType Subject { get; set; }
+    public bool IsPremium { get; set; }
+    public int Price { get; set; }
+
+    /// <summary>
+    /// True when the current user can open the full test:
+    /// the test is free, the user already purchased it, or the user is an admin.
+    /// </summary>
+    public bool IsPurchased { get; set; }
 }

@@ -49,6 +49,8 @@ public class TestService(
     public async Task<List<TestResultDto>> GetAllAsync(SubjectType? subject)
     {
         var userRole = HttpContextHelper.UserRole;
+        var userId = HttpContextHelper.UserId;
+        var isAdmin = userRole is "Admin" or "SuperAdmin";
 
         return await unitOfWork.Tests
             .SelectAll(t => !t.IsDeleted)
@@ -59,6 +61,15 @@ public class TestService(
                 Id = test.Id,
                 Title = test.Title,
                 Description = test.Description,
+                Subject = test.Subject,
+                IsPremium = test.IsPremium,
+                Price = test.Price,
+
+                IsPurchased = !test.IsPremium || isAdmin || (userId != null && unitOfWork.TransactionHistories
+                    .SelectAll()
+                    .Any(th => th.UserId == userId
+                               && th.TestId == test.Id
+                               && th.Type == BalanceTransactionType.Purchase)),
 
                 QuestionCount = unitOfWork.Questions
                                     .SelectAll()
@@ -100,7 +111,11 @@ public class TestService(
                 .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
                 .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
                 .FirstOrDefaultAsync();
-            
+
+            if (test is null) throw new MilliyMockException(404, "Test not found");
+
+            await EnsureTestAccessAsync(test);
+
             var groupedQuestions = await unitOfWork.QuestionGroups
                 .SelectAll(qg => qg.TestId == testId && !qg.IsDeleted)
                 .Include(qg => qg.Translations)
@@ -114,10 +129,38 @@ public class TestService(
 
             return fullTest;
         }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error getting full test with id: {id}", testId);
             throw new MilliyMockException();
         }
+    }
+
+    /// <summary>
+    /// Ensures the current caller is allowed to open the given test's full content.
+    /// Free tests and admins always pass; premium tests require a purchase transaction.
+    /// </summary>
+    private async Task EnsureTestAccessAsync(Test test)
+    {
+        if (!test.IsPremium) return;
+
+        var userRole = HttpContextHelper.UserRole;
+        if (userRole is "Admin" or "SuperAdmin") return;
+
+        var userId = HttpContextHelper.UserId
+                     ?? throw new MilliyMockException(402, "This is a premium test. Please sign in and purchase it.");
+
+        var purchased = await unitOfWork.TransactionHistories
+            .SelectAll(th => th.UserId == userId
+                             && th.TestId == test.Id
+                             && th.Type == BalanceTransactionType.Purchase)
+            .AnyAsync();
+
+        if (!purchased)
+            throw new MilliyMockException(402, "This is a premium test. Please purchase it to continue.");
     }
 }

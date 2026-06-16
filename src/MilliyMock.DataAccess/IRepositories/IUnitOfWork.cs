@@ -15,5 +15,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<Option> Options { get; }
     IRepository<UserTestAttempt> UserTestAttempts { get; }
     IRepository<UserAnswer> UserAnswer { get; }
+    IRepository<UserBalance> UserBalances { get; }
+    IRepository<TransactionHistory> TransactionHistories { get; }
     Task<bool> SaveChangesAsync();
 }
