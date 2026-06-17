@@ -53,7 +53,7 @@ public class TestController(ITestService testService) : BaseController
         });
         */
     
-    [AllowAnonymous]
+    [Authorize]
     [HttpGet("{testId:long}")]
     public async Task<IActionResult> GetTheWholeTest(long testId)
         => Ok(new Response
