@@ -77,6 +77,12 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
         return user is null ? throw new MilliyMockException(404, "User not found") : mapper.Map<UserResultDto>(user);
     }
 
+    public async ValueTask<UserResultDto> GeByTelegramUserId(long id)
+    {
+        var user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == id);
+        return mapper.Map<UserResultDto>(user);
+    }
+
     public async ValueTask<UserResultDto> GetMe()
     {
         var userId = HttpContextHelper.UserId;

@@ -51,42 +51,54 @@ public class BotUserService(
         try
         {
             logger.LogInformation("Adding balance via bot with messageText: {text}", messageText);
-            var userIdentifier = messageText.Split(' ')[1];
-            var amountP = messageText.Split(' ')[2];
-            if (!int.TryParse(amountP, out var amount))
-                return "I don't understand";
-            
+
+            var parts = messageText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 3)
+                return "Usage: /addbalance <@username | telegramId | email> <amount>";
+
+            var userIdentifier = parts[1];
+            if (!int.TryParse(parts[2], out var amount))
+                return "Amount must be a whole number.";
+
             User? user = null;
-            if (long.TryParse(userIdentifier, out var userId))
+            if (long.TryParse(userIdentifier, out var telegramUserId))
             {
-                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == userId);
+                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == telegramUserId);
                 if (user is null) return "User with this telegram user id doesn't exist";
             }
-
             else if (userIdentifier.StartsWith('@'))
             {
-                var botUser = await unitOfWork.BotUsers.SelectAsync(bu => bu.Username == userIdentifier);
+                var handle = userIdentifier.TrimStart('@');
+                var botUser = await unitOfWork.BotUsers.SelectAsync(bu => bu.Username == handle);
                 if (botUser is null) return "User with this telegram username doesn't exist";
+
+                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == botUser.TgUserId);
+                if (user is null) return "This telegram user hasn't linked an account yet";
             }
             else if (userIdentifier.Contains('@'))
             {
                 user = await unitOfWork.Users.SelectAsync(u => u.Email == userIdentifier);
                 if (user is null) return "User with this email doesn't exist";
             }
-            else return "I don't understand.";
+            else return "Couldn't recognize the user. Use @username, telegram id, or email.";
 
             var adjustDto = new AdjustBalanceDto
             {
                 Amount = amount,
-                UserId = user!.Id
+                UserId = user.Id
             };
             await userBalanceService.AdjustAsync(adjustDto);
-            return "Done";
+            return $"Done. Adjusted balance by {amount}.";
+        }
+        catch (MilliyMockException ex)
+        {
+            logger.LogWarning(ex, "Add balance via bot rejected: {text}", messageText);
+            return ex.Message;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating adding balance with messageText: {text}", messageText);
-            throw new MilliyMockException();
+            logger.LogError(ex, "Error adding balance with messageText: {text}", messageText);
+            return "Something went wrong while adjusting the balance.";
         }
     }
 

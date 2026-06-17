@@ -12,6 +12,7 @@ using MilliyMock.Service.Dtos.UserAnswers;
 using MilliyMock.Service.Dtos.UserBalances;
 using MilliyMock.Service.Dtos.Users;
 using MilliyMock.Service.Dtos.UserTestAttempt;
+using TgUser = Telegram.Bot.Types.User;
 
 namespace MilliyMock.Service.Mappers;
 
@@ -92,6 +93,10 @@ public class MapperProfile : Profile
         // Bot user
         CreateMap<BotUser, CreateBotUserDto>().ReverseMap();
         CreateMap<BotUser, BotUserResultDto>().ReverseMap();
+        CreateMap<TgUser, CreateBotUserDto>()
+            .ForMember(dest => dest.TgUserId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.FullName,
+                opt => opt.MapFrom(src => (src.FirstName + " " + src.LastName).Trim()));
 
         // Balance & Transactions
         CreateMap<UserBalance, UserBalanceResultDto>().ReverseMap();

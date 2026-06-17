@@ -1,6 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using MilliyMock.Domain.Exceptions;
+using MilliyMock.Domain.Enums;
 using MilliyMock.Service.Dtos.BotUsers;
 using MilliyMock.Service.Interfaces;
 using Telegram.Bot;
@@ -12,7 +12,8 @@ namespace MilliyMock.Service.Handlers;
 
 public class UpdateHandler(ITelegramBotClient bot,
     ILogger<UpdateHandler> logger,
-    IBotUserService botUserService, 
+    IBotUserService botUserService,
+    IUserService userService,
     IMapper mapper) : IUpdateHandler
 {
     private static readonly InputPollOption[] PollOptions = ["Hello", "World!"];
@@ -42,7 +43,7 @@ public class UpdateHandler(ITelegramBotClient bot,
 
     private async Task OnMessage(Message msg)
     {
-        logger.LogInformation("Receive message type: {MessageType} from user: {Nigga}", msg.Type, msg.From);
+        logger.LogInformation("Receive message type: {MessageType} from user: {User}", msg.Type, msg.From);
         
         var dto = mapper.Map<CreateBotUserDto>(msg.From);
         await botUserService.CreateAsync(dto);
@@ -62,8 +63,15 @@ public class UpdateHandler(ITelegramBotClient bot,
 
     private async Task AddBalance(Message msg)
     {
+        var sender = await userService.GeByTelegramUserId(msg.From!.Id);
+        if (sender is null || sender.Role == UserRole.User)
+        {
+            await bot.SendMessage(msg.From!.Id, "You are not authorized to use this command.");
+            return;
+        }
+
         var responseText = await botUserService.AddBalanceViaBotAsync(msg.Text!);
-        await bot.SendMessage(msg!.From!.Id, responseText);
+        await bot.SendMessage(msg.From!.Id, responseText);
     }
     
     /*
@@ -83,7 +91,8 @@ public class UpdateHandler(ITelegramBotClient bot,
 
  async Task<Message> Usage(Message msg)
  {
-     return await bot.SendMessage(msg.Chat, "nigga");
+     return await bot.SendMessage(msg.Chat,
+         "Unknown command.\nUsage: /addbalance <@username | telegramId | email> <amount>");
  }
  
  #endregion    

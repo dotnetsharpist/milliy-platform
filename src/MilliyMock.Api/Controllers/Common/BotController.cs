@@ -10,7 +10,7 @@ namespace MilliyMock.Controllers.Common;
 [Route("api/bot")]
 public class BotController(
     IOptions<BotConfiguration> config,
-    IUpdateHandler updateHandler) : ControllerBase
+    IUpdateHandler handleUpdateService) : ControllerBase
 {
     [HttpGet("setWebhook")]
     public async Task<string> SetWebHook([FromServices] ITelegramBotClient bot, CancellationToken ct)
@@ -26,6 +26,16 @@ public class BotController(
     {
         if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != config.Value.SecretToken)
             return Forbid();
+        
+        try
+        {
+            await handleUpdateService.HandleUpdateAsync(bot, update, ct);
+        }
+        catch (Exception exception)
+        {
+            await handleUpdateService.HandleErrorAsync(bot, exception,
+                HandleErrorSource.HandleUpdateError, ct);
+        }
 
         return Ok();
     }
