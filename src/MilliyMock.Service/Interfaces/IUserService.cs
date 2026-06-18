@@ -9,6 +9,6 @@ public interface IUserService
     ValueTask<bool> Delete(long id);
     ValueTask<List<UserResultDto>> GetAll();
     ValueTask<UserResultDto> GeById(long id);
-    ValueTask<UserResultDto> GeByTelegramUserId(long id);
+    ValueTask<UserResultDto?> GeByTelegramUserId(long id);
     ValueTask<UserResultDto> GetMe();
 }

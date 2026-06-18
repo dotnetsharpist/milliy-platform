@@ -63,7 +63,7 @@ public class BotUserService(
             User? user = null;
             if (long.TryParse(userIdentifier, out var telegramUserId))
             {
-                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == telegramUserId);
+                user = await unitOfWork.Users.SelectAsync(u => u.BotUser != null && u.BotUser.TgUserId == telegramUserId);
                 if (user is null) return "User with this telegram user id doesn't exist";
             }
             else if (userIdentifier.StartsWith('@'))
@@ -72,7 +72,7 @@ public class BotUserService(
                 var botUser = await unitOfWork.BotUsers.SelectAsync(bu => bu.Username == handle);
                 if (botUser is null) return "User with this telegram username doesn't exist";
 
-                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == botUser.TgUserId);
+                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == botUser.Id);
                 if (user is null) return "This telegram user hasn't linked an account yet";
             }
             else if (userIdentifier.Contains('@'))

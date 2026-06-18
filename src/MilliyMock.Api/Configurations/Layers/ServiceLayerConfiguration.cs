@@ -4,6 +4,7 @@ using MilliyMock.Service.Interfaces;
 using MilliyMock.Service.Mappers;
 using MilliyMock.Service.Services;
 using Telegram.Bot;
+using Telegram.Bot.AspNetCore;
 using Telegram.Bot.Polling;
 
 namespace MilliyMock.Configurations.Layers;
@@ -32,6 +33,7 @@ public static class ServiceLayerConfiguration
         builder.Services.AddScoped<IUpdateHandler, UpdateHandler>();
         builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
             httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));
+        builder.Services.ConfigureTelegramBotMvc();
         
         var config = builder.Configuration.GetSection("AutoMapperLicenceKey");
         builder.Services.AddAutoMapper(cfg =>

@@ -28,6 +28,7 @@ public class UpdateHandler(ITelegramBotClient bot,
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        if (update is null) return;
         cancellationToken.ThrowIfCancellationRequested();
         /*
         var dto = mapper.Map<BotUserCreationDto>(update.Message!.From);
@@ -53,7 +54,7 @@ public class UpdateHandler(ITelegramBotClient bot,
         
         await (messageText.Split(' ')[0] switch
         {
-            //"/start" => OnStart(),
+            "/start" => OnStart(msg),
             "/addbalance" => AddBalance(msg),
             _ => Usage(msg)
         });
@@ -61,14 +62,17 @@ public class UpdateHandler(ITelegramBotClient bot,
         //var userId = msg.Chat.Id;
     }
 
+    private async Task OnStart(Message msg) => await bot.SendMessage(msg.From!.Id, "hello");
+    
+
     private async Task AddBalance(Message msg)
     {
         var sender = await userService.GeByTelegramUserId(msg.From!.Id);
-        if (sender is null || sender.Role == UserRole.User)
-        {
-            await bot.SendMessage(msg.From!.Id, "You are not authorized to use this command.");
-            return;
-        }
+        // if (sender is null || sender.Role == UserRole.User)
+        // {
+        //     await bot.SendMessage(msg.From!.Id, "You are not authorized to use this command.");
+        //     return;
+        // }
 
         var responseText = await botUserService.AddBalanceViaBotAsync(msg.Text!);
         await bot.SendMessage(msg.From!.Id, responseText);
