@@ -41,7 +41,7 @@ public class AuthService(
             if (!ValidateTelegramData(dto)) throw new MilliyMockException(409, "Bruh");
 
             logger.LogInformation("Login attempt via telegram with username {username}", dto.Username);
-            var user = await unitOfWork.Users.SelectAsync(u => u.BotUser != null && u.BotUserId == dto.Id);
+            var user = await unitOfWork.Users.SelectAsync(u => u.BotUser != null && u.BotUser.TgUserId == dto.Id);
 
             if (user is not null)
                 return new LoginResultDto
