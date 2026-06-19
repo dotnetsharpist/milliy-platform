@@ -1,7 +1,5 @@
 using System.Linq.Expressions;
 using MilliyMock.Domain.Entities;
-using MilliyMock.Domain.Enums;
-using MilliyMock.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 using MilliyMock.Domain.Commons;
 
@@ -32,14 +30,16 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             .HasIndex(b => b.UserId)
             .IsUnique();
 
+        /*
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
             {
                 Id = 1, FirstName = "Abdurrohman", Email = "ysharpist@gmail.com",
-                PasswordHash = PasswordHelper.Hash("milliymockadmin3"),
+                PasswordHash = PasswordHelper.Hash(configuration.GetSection("SuperAdminPassword").Value!),
                 Role = UserRole.SuperAdmin, CreatedBy = 1
             }
         );
+    */
     }
     
     
