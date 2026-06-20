@@ -10,7 +10,7 @@ namespace MilliyMock.Controllers;
 public class UserTestAttemptController(IUserTestAttemptService service) : BaseController
 {
     [HttpPost]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> CreateAsync(CreateUserTestAttemptDto dto)
         => Ok(new Response
         {
@@ -26,12 +26,21 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         });
 
     [HttpGet]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> GetById([FromQuery] long testAttemptId)
         => Ok(new Response
         {
             Data = await service.GetById(testAttemptId)
         });
+    
+    [HttpGet("get-by-test-id")]
+    [Authorize]
+    public async Task<IActionResult> GetByTestId([FromQuery] long testId)
+        => Ok(new Response
+        {
+            Data = await service.GetByTestId(testId)
+        });
+
 
     [HttpPost("submit")]
     [AllowAnonymous]

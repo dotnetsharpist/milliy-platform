@@ -9,4 +9,5 @@ public class CreateTestDto
     public string? Description { get; set; }
     public bool IsPremium { get; set; }
     public int Price { get; set; }
+    public int DurationMinutes { get; set; }
 }

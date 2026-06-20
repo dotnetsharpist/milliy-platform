@@ -53,14 +53,23 @@ public class UserBalanceService(
             if (!test.IsPremium || test.Price <= 0)
                 throw new MilliyMockException(400, "Test is not premium");
 
-            var alreadyPurchased = await unitOfWork.TransactionHistories
+            // Pay-per-attempt: a purchase unlocks one run and is consumed when that run is
+            // completed. Allow buying again only once every previously paid run is finished,
+            // which prevents stacking credits / accidental double charges.
+            var purchaseCount = await unitOfWork.TransactionHistories
                 .SelectAll(t => t.UserId == userId
                                 && t.TestId == testId
                                 && t.Type == BalanceTransactionType.Purchase)
-                .AnyAsync();
+                .CountAsync();
 
-            if (alreadyPurchased)
-                throw new MilliyMockException(409, "Test already purchased");
+            var completedCount = await unitOfWork.UserTestAttempts
+                .SelectAll(a => a.UserId == userId
+                                && a.TestId == testId
+                                && a.AttemptStatus == AttemptStatus.Completed)
+                .CountAsync();
+
+            if (purchaseCount > completedCount)
+                throw new MilliyMockException(409, "You already have a paid attempt for this test. Finish it before purchasing again.");
 
             await ApplyTransactionAsync(userId, -test.Price, BalanceTransactionType.Purchase,
                 $"Purchase of test '{test.Title}'", testId);

@@ -13,6 +13,7 @@ public class TestResultDto
     public SubjectType Subject { get; set; }
     public bool IsPremium { get; set; }
     public int Price { get; set; }
+    public int DurationMinutes { get; set; }
 
     /// <summary>
     /// True when the current user can open the full test:

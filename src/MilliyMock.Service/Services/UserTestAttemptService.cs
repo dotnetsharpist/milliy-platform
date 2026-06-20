@@ -49,17 +49,20 @@ public class UserTestAttemptService(
 
             if (test.IsPremium)
             {
-                var previousAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ua => ua.TestId == dto.TestId);
-                if (previousAttempt is not null) throw new MilliyMockException(409, "Already done this");
-
-                var purchased = await unitOfWork.TransactionHistories
+                // Pay-per-attempt: each purchase unlocks exactly one attempt, so a new
+                // attempt can only be started while there are unused (un-attempted) purchases.
+                var purchaseCount = await unitOfWork.TransactionHistories
                     .SelectAll(th => th.UserId == userId
                                      && th.TestId == dto.TestId
                                      && th.Type == BalanceTransactionType.Purchase)
-                    .AnyAsync();
+                    .CountAsync();
 
-                if (!purchased)
-                    throw new MilliyMockException(402, "This is a premium test. Please purchase it to continue.");
+                var attemptCount = await unitOfWork.UserTestAttempts
+                    .SelectAll(a => a.UserId == userId && a.TestId == dto.TestId)
+                    .CountAsync();
+
+                if (purchaseCount <= attemptCount)
+                    throw new MilliyMockException(402, "This is a premium test. Please purchase it to start a new attempt.");
             }
 
             var attempt = mapper.Map<UserTestAttempt>(dto);
@@ -292,6 +295,16 @@ public class UserTestAttemptService(
                 HttpContextHelper.UserId, testAttemptId);
             throw new MilliyMockException();
         }
+    }
+
+    public async Task<UserTestAttemptResultDto?> GetByTestId(long testId)
+    {
+        var attempt = await unitOfWork.UserTestAttempts.SelectAll(a =>
+                a.TestId == testId)
+            .Include(a => a.UserAnswers)
+            .FirstOrDefaultAsync();
+        
+        return mapper.Map<UserTestAttemptResultDto>(attempt);
     }
 
     public async Task<UserTestAttemptResultDto> GetProgressAsync(long testId)

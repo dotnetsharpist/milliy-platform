@@ -65,11 +65,20 @@ public class TestService(
                 IsPremium = test.IsPremium,
                 Price = test.Price,
 
-                IsPurchased = !test.IsPremium || isAdmin || (userId != null && unitOfWork.TransactionHistories
-                    .SelectAll()
-                    .Any(th => th.UserId == userId
-                               && th.TestId == test.Id
-                               && th.Type == BalanceTransactionType.Purchase)),
+                // Pay-per-attempt: "purchased" means a paid run is currently available
+                // (more purchases than completed attempts). Flips back to false once the
+                // paid run is finished, prompting another purchase for the next attempt.
+                IsPurchased = !test.IsPremium || isAdmin || (userId != null
+                    && unitOfWork.TransactionHistories
+                        .SelectAll()
+                        .Count(th => th.UserId == userId
+                                     && th.TestId == test.Id
+                                     && th.Type == BalanceTransactionType.Purchase)
+                       > unitOfWork.UserTestAttempts
+                        .SelectAll()
+                        .Count(a => a.UserId == userId
+                                    && a.TestId == test.Id
+                                    && a.AttemptStatus == AttemptStatus.Completed)),
 
                 QuestionCount = unitOfWork.Questions
                                     .SelectAll()
@@ -142,7 +151,10 @@ public class TestService(
 
     /// <summary>
     /// Ensures the current caller is allowed to open the given test's full content.
-    /// Free tests and admins always pass; premium tests require a purchase transaction.
+    /// Free tests and admins always pass. For premium tests access is pay-per-attempt:
+    /// every purchase unlocks exactly one run and is consumed once that run is completed,
+    /// so the content stays open while a paid run is in progress (resume / refresh) but
+    /// locks again afterwards until the test is purchased anew.
     /// </summary>
     private async Task EnsureTestAccessAsync(Test test)
     {
@@ -154,13 +166,20 @@ public class TestService(
         var userId = HttpContextHelper.UserId
                      ?? throw new MilliyMockException(402, "This is a premium test. Please sign in and purchase it.");
 
-        var purchased = await unitOfWork.TransactionHistories
+        var purchaseCount = await unitOfWork.TransactionHistories
             .SelectAll(th => th.UserId == userId
                              && th.TestId == test.Id
                              && th.Type == BalanceTransactionType.Purchase)
-            .AnyAsync();
+            .CountAsync();
 
-        if (!purchased)
-            throw new MilliyMockException(402, "This is a premium test. Please purchase it to continue.");
+        var completedCount = await unitOfWork.UserTestAttempts
+            .SelectAll(a => a.UserId == userId
+                            && a.TestId == test.Id
+                            && a.AttemptStatus == AttemptStatus.Completed)
+            .CountAsync();
+
+        // Access only while there is a paid run that has not yet been completed.
+        if (purchaseCount <= completedCount)
+            throw new MilliyMockException(402, "This is a premium test. Please purchase it to start a new attempt.");
     }
 }
