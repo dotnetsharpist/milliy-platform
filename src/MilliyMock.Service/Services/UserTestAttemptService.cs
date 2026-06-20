@@ -32,10 +32,7 @@ public class UserTestAttemptService(
 
             if (userId is null && dto.TempUserId is null)
                 throw new MilliyMockException(409, "Unauthorized");
-
-            var previousAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ua => ua.TestId == dto.TestId);
-            if (previousAttempt is not null) throw new MilliyMockException(409, "Already done this");
-
+            
             /*
             var ongoingAttempt = await unitOfWork.UserTestAttempts
                 .SelectAsync(a =>
@@ -48,9 +45,13 @@ public class UserTestAttemptService(
 
             var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
             if (test is null) throw new MilliyMockException(404, "Test not found");
+            
 
             if (test.IsPremium)
             {
+                var previousAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ua => ua.TestId == dto.TestId);
+                if (previousAttempt is not null) throw new MilliyMockException(409, "Already done this");
+
                 var purchased = await unitOfWork.TransactionHistories
                     .SelectAll(th => th.UserId == userId
                                      && th.TestId == dto.TestId
