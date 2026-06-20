@@ -33,6 +33,9 @@ public class UserTestAttemptService(
             if (userId is null && dto.TempUserId is null)
                 throw new MilliyMockException(409, "Unauthorized");
 
+            var previousAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ua => ua.TestId == dto.TestId);
+            if (previousAttempt is not null) throw new MilliyMockException(409, "Already done this");
+
             /*
             var ongoingAttempt = await unitOfWork.UserTestAttempts
                 .SelectAsync(a =>
