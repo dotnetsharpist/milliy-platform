@@ -21,6 +21,7 @@ public class BotController(
     }
 
     [HttpPost]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> Post([FromBody] Update update, [FromServices] ITelegramBotClient bot,
         CancellationToken ct)
     {
