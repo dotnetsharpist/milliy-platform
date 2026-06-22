@@ -27,7 +27,7 @@ public class QuestionController(IQuestionService questionService) : BaseControll
         });
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> GetByTestIdAsync([FromQuery] long testId)
         => Ok(new Response
         {

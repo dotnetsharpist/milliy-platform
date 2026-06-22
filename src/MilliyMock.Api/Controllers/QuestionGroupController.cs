@@ -26,7 +26,7 @@ public class QuestionGroupController(IQuestionGroupService groupService) : BaseC
         });
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> GetByTestIdAsync(long testId)
         => Ok(new Response
         {
@@ -34,7 +34,7 @@ public class QuestionGroupController(IQuestionGroupService groupService) : BaseC
         });
 
     [HttpGet("{questionGroupId}")]
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> GetByIdAsync(long questionGroupId)
         => Ok(new Response
         {

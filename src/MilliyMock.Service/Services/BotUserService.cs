@@ -54,33 +54,20 @@ public class BotUserService(
 
             var parts = messageText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length < 3)
-                return "Usage: /addbalance <@username | telegramId | email> <amount>";
+                return "Usage: /addbalance <user id> <amount>";
 
             var userIdentifier = parts[1];
             if (!int.TryParse(parts[2], out var amount))
                 return "Amount must be a whole number.";
 
             User? user = null;
-            if (long.TryParse(userIdentifier, out var telegramUserId))
+            if (long.TryParse(userIdentifier, out var userId))
             {
-                user = await unitOfWork.Users.SelectAsync(u => u.BotUser != null && u.BotUser.TgUserId == telegramUserId);
+                user = await unitOfWork.Users.SelectAsync(u=> u.Id == userId);
                 if (user is null) return "User with this telegram user id doesn't exist";
             }
-            else if (userIdentifier.StartsWith('@'))
-            {
-                var handle = userIdentifier.TrimStart('@');
-                var botUser = await unitOfWork.BotUsers.SelectAsync(bu => bu.Username == handle);
-                if (botUser is null) return "User with this telegram username doesn't exist";
 
-                user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == botUser.Id);
-                if (user is null) return "This telegram user hasn't linked an account yet";
-            }
-            else if (userIdentifier.Contains('@'))
-            {
-                user = await unitOfWork.Users.SelectAsync(u => u.Email == userIdentifier);
-                if (user is null) return "User with this email doesn't exist";
-            }
-            else return "Couldn't recognize the user. Use @username, telegram id, or email.";
+            else return "nigga that's not an id";
 
             var adjustDto = new AdjustBalanceDto
             {

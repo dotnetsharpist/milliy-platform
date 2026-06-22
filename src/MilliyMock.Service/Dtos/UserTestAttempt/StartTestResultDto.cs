@@ -1,11 +1,11 @@
 using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Questions;
 
-namespace MilliyMock.Service.Dtos.Tests;
+namespace MilliyMock.Service.Dtos.UserTestAttempt;
 
-public class FullTestResultDto
+public class StartTestResultDto
 {
-    public long Id { get; set; }
+    public long TestAttemptId { get; set; }
     public string Title { get; set; } = null!;
     public List<QuestionAttemptDto> Questions { get; set; } = [];
     public List<QuestionGroupAttemptDto> QuestionGroups { get; set; } = [];

@@ -9,12 +9,12 @@ namespace MilliyMock.Controllers;
 [Route("api/user-test-attempt")]
 public class UserTestAttemptController(IUserTestAttemptService service) : BaseController
 {
-    [HttpPost]
+    [HttpPost("start-test")]
     [Authorize]
-    public async Task<IActionResult> CreateAsync(CreateUserTestAttemptDto dto)
+    public async Task<IActionResult> StartTestAsync(CreateUserTestAttemptDto dto)
         => Ok(new Response
         {
-            Data = await service.CreateAsync(dto)
+            Data = await service.StartTestAsync(dto)
         });
     
     [HttpGet("get-user-attempts")]

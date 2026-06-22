@@ -33,6 +33,8 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
         var user = await unitOfWork.Users
             .SelectAsync(u => u.Id == userId);
 
+        if (user is null) throw new MilliyMockException();
+
         if (HttpContextHelper.UserId != user.Id)
             throw new MilliyMockException(409, "nah");
 

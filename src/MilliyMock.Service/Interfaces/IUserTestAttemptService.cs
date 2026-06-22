@@ -5,7 +5,7 @@ namespace MilliyMock.Service.Interfaces;
 
 public interface IUserTestAttemptService
 {
-    Task<UserTestAttemptResultDto> CreateAsync(CreateUserTestAttemptDto dto);
+    Task<StartTestResultDto> StartTestAsync(CreateUserTestAttemptDto dto);
     Task<AttemptedTestResultDto> SubmitTest(long testAttemptId);
     Task<bool> PauseTest(long testId);
     Task<List<UserTestAttemptResultDto>> GetByUserId();

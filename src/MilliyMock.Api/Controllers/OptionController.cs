@@ -18,7 +18,7 @@ public class OptionController(IOptionService optionService) : BaseController
         });
     
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public async Task<IActionResult> GetByQuestionIdAsync([FromQuery] long? questionId, [FromQuery] long? questionGroupId)
         => Ok(new Response
         {

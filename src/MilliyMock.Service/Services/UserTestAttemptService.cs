@@ -5,6 +5,7 @@ using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Enums;
 using MilliyMock.Domain.Exceptions;
+using MilliyMock.Service.Dtos.QuestionGroups;
 using MilliyMock.Service.Dtos.Questions;
 using MilliyMock.Service.Dtos.TempUsers;
 using MilliyMock.Service.Dtos.Tests;
@@ -17,62 +18,56 @@ namespace MilliyMock.Service.Services;
 
 public class UserTestAttemptService(
     IUnitOfWork unitOfWork, 
+    ITransactionService transactionService,
     IMapper mapper,
     ILogger<UserTestAttemptService> logger) : IUserTestAttemptService
 {
-    public async Task<UserTestAttemptResultDto> CreateAsync(CreateUserTestAttemptDto dto)
+    public async Task<StartTestResultDto> StartTestAsync(CreateUserTestAttemptDto dto)
     {
         try
         {
             logger.LogInformation("Creating test attempt for test {testId}", dto.TestId);
+
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException();
+            var user = await unitOfWork.Users.SelectAsync(u => u.Id == userId);
+
+            if (user is null) throw new MilliyMockException(409, "Unauthorized");
             
-            var userId = dto.TempUserId is not null
-                ? null
-                : HttpContextHelper.UserId;
+            var test = await unitOfWork.Tests.SelectAll(t => t.Id == dto.TestId && !t.IsDeleted)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
+                .FirstOrDefaultAsync();
 
-            if (userId is null && dto.TempUserId is null)
-                throw new MilliyMockException(409, "Unauthorized");
-            
-            /*
-            var ongoingAttempt = await unitOfWork.UserTestAttempts
-                .SelectAsync(a =>
-                    a.UserId == userId && a.TestId == dto.TestId && a.AttemptStatus != AttemptStatus.Completed);
-                    
-
-            if (ongoingAttempt != null)
-                throw new MilliyMockException(409, "Already have an active test twin.");
-            */
-
-            var test = await unitOfWork.Tests.SelectAsync(t => t.Id == dto.TestId);
             if (test is null) throw new MilliyMockException(404, "Test not found");
             
 
             if (test.IsPremium)
             {
-                // Pay-per-attempt: each purchase unlocks exactly one attempt, so a new
-                // attempt can only be started while there are unused (un-attempted) purchases.
-                var purchaseCount = await unitOfWork.TransactionHistories
-                    .SelectAll(th => th.UserId == userId
-                                     && th.TestId == dto.TestId
-                                     && th.Type == BalanceTransactionType.Purchase)
-                    .CountAsync();
-
-                var attemptCount = await unitOfWork.UserTestAttempts
-                    .SelectAll(a => a.UserId == userId && a.TestId == dto.TestId)
-                    .CountAsync();
-
-                if (purchaseCount <= attemptCount)
-                    throw new MilliyMockException(402, "This is a premium test. Please purchase it to start a new attempt.");
+                var result = await transactionService.ApplyTransactionAsync(userId, -test.Price, BalanceTransactionType.Purchase,
+                    $"Purchase of test '{test.Title}'", test.Id);
+                if (!result) throw new MilliyMockException(500, "Failed to apply transaction");
             }
-
+            
+            var groupedQuestions = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.TestId == dto.TestId && !qg.IsDeleted)
+                .Include(qg => qg.Translations)
+                .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+                .Include(qg => qg.Options)
+                .ToListAsync();
+            
             var attempt = mapper.Map<UserTestAttempt>(dto);
+            attempt.StartedAt = TimeHelper.GetDateTime();
             attempt.UserId = userId;
-            attempt.TempUserId = dto.TempUserId;
 
             await unitOfWork.UserTestAttempts.InsertAsync(attempt);
-            await unitOfWork.UserTestAttempts.SaveAsync();
 
-            return mapper.Map<UserTestAttemptResultDto>(attempt);
+            var attemptedTest = new StartTestResultDto();
+            attemptedTest.TestAttemptId = attempt.Id;
+            attemptedTest = mapper.Map<StartTestResultDto>(test);
+            attemptedTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
+
+
+            return attemptedTest;
         }
         catch (MilliyMockException)
         {

@@ -28,7 +28,6 @@ public class UpdateHandler(ITelegramBotClient bot,
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        if (update is null) return;
         cancellationToken.ThrowIfCancellationRequested();
         /*
         var dto = mapper.Map<BotUserCreationDto>(update.Message!.From);
@@ -96,7 +95,7 @@ public class UpdateHandler(ITelegramBotClient bot,
  async Task<Message> Usage(Message msg)
  {
      return await bot.SendMessage(msg.Chat,
-         "Unknown command.\nUsage: /addbalance <@username | telegramId | email> <amount>");
+         "Unknown command.\nUsage: /addbalance <user id> <amount>");
  }
  
  #endregion    

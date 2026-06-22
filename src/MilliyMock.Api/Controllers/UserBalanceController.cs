@@ -42,12 +42,4 @@ public class UserBalanceController(IUserBalanceService balanceService) : BaseCon
         {
             Data = await balanceService.AdjustAsync(dto)
         });
-
-    [HttpPost("purchase/{testId:long}")]
-    [Authorize]
-    public async Task<IActionResult> PurchaseTest(long testId)
-        => Ok(new Response
-        {
-            Data = await balanceService.PurchaseTestAsync(testId)
-        });
 }

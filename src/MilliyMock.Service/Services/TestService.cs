@@ -111,44 +111,7 @@ public class TestService(
 
         return testDto;
     }
-
-    public async Task<FullTestResultDto> GetFullTest(long testId)
-    {
-        try
-        {
-            var test = await unitOfWork.Tests.SelectAll(t => t.Id == testId && !t.IsDeleted)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
-                .FirstOrDefaultAsync();
-
-            if (test is null) throw new MilliyMockException(404, "Test not found");
-
-            await EnsureTestAccessAsync(test);
-
-            var groupedQuestions = await unitOfWork.QuestionGroups
-                .SelectAll(qg => qg.TestId == testId && !qg.IsDeleted)
-                .Include(qg => qg.Translations)
-                .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
-                .Include(qg => qg.Options)
-                .ToListAsync();
-
-            // mapping
-            var fullTest = mapper.Map<FullTestResultDto>(test);
-            fullTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
-
-            return fullTest;
-        }
-        catch (MilliyMockException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error getting full test with id: {id}", testId);
-            throw new MilliyMockException();
-        }
-    }
-
+    
     /// <summary>
     /// Ensures the current caller is allowed to open the given test's full content.
     /// Free tests and admins always pass. For premium tests access is pay-per-attempt:

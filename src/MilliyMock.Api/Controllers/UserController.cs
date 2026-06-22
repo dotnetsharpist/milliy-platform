@@ -10,7 +10,7 @@ namespace MilliyMock.Controllers;
 public class UserController(IUserService userService) : BaseController
 {
     [HttpGet]
-    [Authorize(Roles = "SuperAdmin,Admin,User")]
+    [Authorize]
     public async Task<IActionResult> GetMe()
         => Ok(new Response
         {
