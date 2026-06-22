@@ -33,6 +33,7 @@ public class MapperProfile : Profile
         CreateMap<Test, UpdateTestDto>().ReverseMap();
         CreateMap<Test, TestResultDto>().ReverseMap();
         CreateMap<Test, StartTestResultDto>().ReverseMap();
+        CreateMap<Test, TestAttemptResultsDto>();
         
         // QuestionGroup
         CreateMap<QuestionGroup, CreateQuestionGroupDto>()
@@ -50,6 +51,7 @@ public class MapperProfile : Profile
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.Options))
             .ReverseMap();
         CreateMap<QuestionGroup, QuestionGroupAttemptDto>().ReverseMap();
+        CreateMap<QuestionGroup, QuestionGroupAttemptResultDto>().ReverseMap();
         
         // Question
         CreateMap<Question, CreateQuestionDto>()
@@ -65,6 +67,7 @@ public class MapperProfile : Profile
             .ReverseMap();
         CreateMap<Translation, TranslationResultDto>();
         CreateMap<Question, QuestionAttemptDto>().ReverseMap();
+        CreateMap<Question, QuestionAttemptResultDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptForQuestionGroupDto>().ReverseMap();
 
         // Question Explanation
@@ -80,6 +83,7 @@ public class MapperProfile : Profile
         CreateMap<UpdateOptionDto, Option>().ReverseMap();
         CreateMap<Option, OptionResultDto>().ReverseMap();
         CreateMap<Option, OptionAttemptDto>().ReverseMap();
+        CreateMap<Option, OptionAttemptResultDto>().ReverseMap();
         
         // UserTestAttempt
         CreateMap<UserTestAttempt, CreateUserTestAttemptDto>().ReverseMap();
@@ -89,6 +93,7 @@ public class MapperProfile : Profile
         CreateMap<UserAnswer, CreateUserAnswerDto>().ReverseMap();
         CreateMap<UpdateUserAnswerDto, UserAnswer>();
         CreateMap<UserAnswer, UserAnswerResultDto>().ReverseMap();
+        CreateMap<UserAnswer, UserAnswerAttemptResultDto>();
         
         // Bot user
         CreateMap<BotUser, CreateBotUserDto>().ReverseMap();

@@ -60,10 +60,10 @@ public class UserTestAttemptService(
             attempt.UserId = userId;
 
             await unitOfWork.UserTestAttempts.InsertAsync(attempt);
+            await unitOfWork.UserTestAttempts.SaveAsync();
 
-            var attemptedTest = new StartTestResultDto();
+            var attemptedTest = mapper.Map<StartTestResultDto>(test);
             attemptedTest.TestAttemptId = attempt.Id;
-            attemptedTest = mapper.Map<StartTestResultDto>(test);
             attemptedTest.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
 
 
@@ -76,6 +76,52 @@ public class UserTestAttemptService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error creating test attempt for test {testId}", dto.TestId);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<TestAttemptResultsDto> GetResultsAsync(long testAttemptId)
+    {
+        try
+        {
+            logger.LogInformation("Retrieving results for test attempt {testAttemptId}", testAttemptId);
+
+            var attempt = await unitOfWork.UserTestAttempts
+                .SelectAll(ta => ta.Id == testAttemptId && ta.AttemptStatus == AttemptStatus.Completed)
+                .Include(ta => ta.UserAnswers)
+                .FirstOrDefaultAsync();
+
+            if (attempt is null) throw new MilliyMockException(404, "Attempt not found");
+
+            var test = await unitOfWork.Tests.SelectAll(t => t.Id == attempt.TestId && !t.IsDeleted)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
+                .FirstOrDefaultAsync();
+
+            if (test is null) throw new MilliyMockException(404, "Test not found");
+
+            var groupedQuestions = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.TestId == attempt.TestId && !qg.IsDeleted)
+                .Include(qg => qg.Translations)
+                .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+                .Include(qg => qg.Options)
+                .ToListAsync();
+
+            var results = mapper.Map<TestAttemptResultsDto>(test);
+            results.TestAttemptId = attempt.Id;
+            results.TotalScore = attempt.TotalScore;
+            results.QuestionGroups = mapper.Map<List<QuestionGroupAttemptResultDto>>(groupedQuestions);
+            results.UserAnswers = mapper.Map<List<UserAnswerAttemptResultDto>>(attempt.UserAnswers);
+
+            return results;
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error retrieving results for test attempt {testAttemptId}", testAttemptId);
             throw new MilliyMockException();
         }
     }
@@ -208,37 +254,7 @@ public class UserTestAttemptService(
             throw new MilliyMockException();
         }
     }
-
-    public async Task<bool> PauseTest(long testId)
-    {
-        try
-        {
-            logger.LogInformation("Pausing test attempt for test {testId}", testId);
-            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
-
-            var testAttempt =
-                await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.TestId == testId && ta.UserId == userId);
-
-            if (testAttempt is null)
-                throw new MilliyMockException(404, "No test attempt found");
-
-            if (testAttempt.AttemptStatus == AttemptStatus.Completed)
-                throw new MilliyMockException(400, "Test is already finished");
-
-            testAttempt.AttemptStatus = AttemptStatus.Paused;
-            return await unitOfWork.UserTestAttempts.SaveAsync();
-        }
-        catch (MilliyMockException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error pausing test attempt for test {testId}", testId);
-            throw new MilliyMockException();
-        }
-    }
-
+    
     public async Task<List<UserTestAttemptResultDto>> GetByUserId()
     {
         try
@@ -247,11 +263,11 @@ public class UserTestAttemptService(
             var userId = HttpContextHelper.UserId;
             if (userId is null) throw new MilliyMockException();
 
-            var attempt = await unitOfWork.UserTestAttempts
+            var attempts = await unitOfWork.UserTestAttempts
                 .SelectAll(a => a.UserId == userId && a.AttemptStatus == AttemptStatus.Completed)
                 .ToListAsync();
 
-            return mapper.Map<List<UserTestAttemptResultDto>>(attempt);
+            return mapper.Map<List<UserTestAttemptResultDto>>(attempts);
         }
         catch (MilliyMockException)
         {

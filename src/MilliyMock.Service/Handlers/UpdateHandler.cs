@@ -63,15 +63,16 @@ public class UpdateHandler(ITelegramBotClient bot,
 
     private async Task OnStart(Message msg) => await bot.SendMessage(msg.From!.Id, "hello");
     
-
     private async Task AddBalance(Message msg)
     {
         var sender = await userService.GeByTelegramUserId(msg.From!.Id);
-        // if (sender is null || sender.Role == UserRole.User)
-        // {
-        //     await bot.SendMessage(msg.From!.Id, "You are not authorized to use this command.");
-        //     return;
-        // }
+
+        if (sender is null || sender.Role == UserRole.User)
+        {
+            await bot.SendMessage(msg.From!.Id, "You are not authorized to use this command.");
+            return;
+        }
+
 
         var responseText = await botUserService.AddBalanceViaBotAsync(msg.Text!);
         await bot.SendMessage(msg.From!.Id, responseText);

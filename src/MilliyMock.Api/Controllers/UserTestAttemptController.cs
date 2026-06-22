@@ -33,6 +33,14 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
             Data = await service.GetById(testAttemptId)
         });
     
+    [HttpGet("get-results")]
+    [Authorize]
+    public async Task<IActionResult> GetResults([FromQuery] long testAttemptId)
+        => Ok(new Response
+        {
+            Data = await service.GetResultsAsync(testAttemptId)
+        });
+
     [HttpGet("get-by-test-id")]
     [Authorize]
     public async Task<IActionResult> GetByTestId([FromQuery] long testId)
@@ -40,7 +48,6 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         {
             Data = await service.GetByTestId(testId)
         });
-
 
     [HttpPost("submit")]
     [AllowAnonymous]
