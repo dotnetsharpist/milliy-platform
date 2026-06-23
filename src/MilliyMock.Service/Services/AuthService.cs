@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Google.Apis.Auth;
 using MilliyMock.DataAccess.IRepositories;
 using MilliyMock.Domain.Entities;
 using MilliyMock.Domain.Exceptions;
@@ -95,6 +96,80 @@ public class AuthService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error during telegram login for username {username}", dto.Username);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<LoginResultDto> GoogleLogin(GoogleLoginDto dto)
+    {
+        try
+        {
+            var clientId = configuration["Google:ClientId"];
+            if (string.IsNullOrWhiteSpace(clientId))
+                throw new MilliyMockException(500, "Google client id is not configured");
+
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(dto.Token,
+                    new GoogleJsonWebSignature.ValidationSettings { Audience = [clientId] });
+            }
+            catch (InvalidJwtException ex)
+            {
+                logger.LogWarning(ex, "Invalid Google token");
+                throw new MilliyMockException(401, "Invalid Google token");
+            }
+
+            logger.LogInformation("Login attempt via google with email {email}", payload.Email);
+
+            // Already linked to this Google account → straight login.
+            var user = await unitOfWork.Users.SelectAsync(u => u.GoogleId == payload.Subject);
+
+            if (user is null)
+            {
+                // The email might already belong to an account (email/password, telegram…).
+                var existing = await unitOfWork.Users.SelectAsync(u => u.Email == payload.Email);
+                if (existing is not null)
+                {
+                    // Only attach Google to it when Google has verified the address —
+                    // otherwise a forged unverified email could hijack someone's account.
+                    if (!payload.EmailVerified)
+                        throw new MilliyMockException(409,
+                            "An account with this email already exists. Sign in with your password.");
+
+                    existing.GoogleId = payload.Subject;
+                    existing.EmailConfirmed = true;
+                    user = existing;
+                }
+                else
+                {
+                    user = new User
+                    {
+                        FirstName = payload.GivenName ?? payload.Name ?? "",
+                        LastName = payload.FamilyName,
+                        Email = payload.Email,
+                        EmailConfirmed = payload.EmailVerified,
+                        GoogleId = payload.Subject
+                    };
+                    await unitOfWork.Users.InsertAsync(user);
+                }
+
+                await unitOfWork.SaveChangesAsync();
+            }
+
+            return new LoginResultDto
+            {
+                Token = GenerateToken(user),
+                User = mapper.Map<UserResultDto>(user)
+            };
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during google login");
             throw new MilliyMockException();
         }
     }

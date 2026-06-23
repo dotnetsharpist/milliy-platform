@@ -7,5 +7,6 @@ public interface IAuthService
 {
     Task<string> Register(CreateUserDto dto);
     Task<LoginResultDto> TelegramLogin(TelegramLoginDto dto);
+    Task<LoginResultDto> GoogleLogin(GoogleLoginDto dto);
     ValueTask<LoginResultDto> Login(LoginDto dto);
 }

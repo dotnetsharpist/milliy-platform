@@ -30,6 +30,16 @@ public class AuthController(IAuthService authService) : BaseController
             Data = await authService.TelegramLogin(dto)
         });
     
+    [HttpPost("google-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin(GoogleLoginDto dto)
+        => Ok(new Response
+        {
+            Code = 200,
+            Message = "Ok👍🏿",
+            Data = await authService.GoogleLogin(dto)
+        });
+
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> RegisterAsync(CreateUserDto dto)
