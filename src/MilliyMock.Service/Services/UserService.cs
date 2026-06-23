@@ -81,7 +81,7 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
 
     public async ValueTask<UserResultDto?> GeByTelegramUserId(long id)
     {
-        var user = await unitOfWork.Users.SelectAsync(u => u.BotUserId == id);
+        var user = await unitOfWork.Users.SelectAll(u => u.BotUser != null && u.BotUser.TgUserId == id).Include(u => u.BotUser).FirstOrDefaultAsync();
         return mapper.Map<UserResultDto>(user);
     }
 

@@ -50,19 +50,33 @@ public class AuthService(
                     User = mapper.Map<UserResultDto>(user)
                 };
 
-            var newBotUser = new BotUser
+            // Reuse an existing BotUser (e.g. one the bot created when this person
+            // messaged it first). Inserting a new one would violate the unique
+            // TgUserId index and fail the whole login.
+            var botUser = await unitOfWork.BotUsers.SelectAsync(bu => bu.TgUserId == dto.Id);
+            if (botUser is null)
             {
-                TgUserId = dto.Id,
-                Username = dto.Username,
-                FullName = $"{dto.FirstName} {dto.LastName}".Trim()
-            };
-            await unitOfWork.BotUsers.InsertAsync(newBotUser);
+                botUser = new BotUser
+                {
+                    TgUserId = dto.Id,
+                    Username = dto.Username,
+                    FullName = $"{dto.FirstName} {dto.LastName}".Trim()
+                };
+                await unitOfWork.BotUsers.InsertAsync(botUser);
+            }
+            else
+            {
+                // Adopting an orphan the bot created earlier — refresh its profile
+                // from the login payload, which is the more up-to-date source.
+                botUser.Username = dto.Username;
+                botUser.FullName = $"{dto.FirstName} {dto.LastName}".Trim();
+            }
 
             var newUser = new User
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName ?? "",
-                BotUser = newBotUser
+                BotUser = botUser
             };
             await unitOfWork.Users.InsertAsync(newUser);
 
