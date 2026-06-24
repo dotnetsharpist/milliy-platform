@@ -264,11 +264,62 @@ public class UserTestAttemptService(
             var userId = HttpContextHelper.UserId;
             if (userId is null) throw new MilliyMockException();
 
-            var attempts = await unitOfWork.UserTestAttempts
+            return await unitOfWork.UserTestAttempts
                 .SelectAll(a => a.UserId == userId && a.AttemptStatus == AttemptStatus.Completed)
-                .ToListAsync();
+                .Select(a => new UserTestAttemptResultDto
+                {
+                    Id = a.Id,
+                    UserId = a.UserId ?? 0,
+                    TestId = a.TestId,
+                    StartedAt = a.StartedAt,
+                    FinishedAt = a.FinishedAt,
+                    TotalScore = a.TotalScore,
+                    Test = new TestResultDto
+                    {
+                        Id = a.Test.Id,
+                        Title = a.Test.Title,
+                        Description = a.Test.Description,
+                        Subject = a.Test.Subject,
+                        IsPremium = a.Test.IsPremium,
+                        Price = a.Test.Price,
+                        DurationMinutes = a.Test.DurationMinutes,
 
-            return mapper.Map<List<UserTestAttemptResultDto>>(attempts);
+                        // Pay-per-attempt: "purchased" means a paid run is currently available
+                        // (more purchases than completed attempts). Flips back to false once the
+                        // paid run is finished, prompting another purchase for the next attempt.
+                        IsPurchased = !a.Test.IsPremium || unitOfWork.TransactionHistories
+                            .SelectAll()
+                            .Count(th => th.UserId == userId
+                                         && th.TestId == a.Test.Id
+                                         && th.Type == BalanceTransactionType.Purchase)
+                            > unitOfWork.UserTestAttempts
+                            .SelectAll()
+                            .Count(att => att.UserId == userId
+                                          && att.TestId == a.Test.Id
+                                          && att.AttemptStatus == AttemptStatus.Completed),
+
+                        QuestionCount = unitOfWork.Questions
+                                            .SelectAll()
+                                            .Where(q => !q.IsDeleted && q.TestId == a.Test.Id)
+                                            .Where(q => !(q.QuestionGroupId != null && q.Type == QuestionType.FreeAnswer))
+                                            .Count()
+                                        +
+                                        unitOfWork.Questions
+                                            .SelectAll()
+                                            .Where(q => !q.IsDeleted && q.TestId == a.Test.Id)
+                                            .Where(q => q.QuestionGroupId != null && q.Type == QuestionType.FreeAnswer)
+                                            .Select(q => q.QuestionGroupId)
+                                            .Distinct()
+                                            .Count(),
+
+                        AttemptCount = unitOfWork.UserTestAttempts
+                            .SelectAll()
+                            .Count(att => att.TestId == a.Test.Id),
+
+                        Status = a.Test.Status
+                    }
+                })
+                .ToListAsync();
         }
         catch (MilliyMockException)
         {

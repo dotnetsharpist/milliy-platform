@@ -64,6 +64,7 @@ public class TestService(
                 Subject = test.Subject,
                 IsPremium = test.IsPremium,
                 Price = test.Price,
+                DurationMinutes = test.DurationMinutes,
 
                 // Pay-per-attempt: "purchased" means a paid run is currently available
                 // (more purchases than completed attempts). Flips back to false once the

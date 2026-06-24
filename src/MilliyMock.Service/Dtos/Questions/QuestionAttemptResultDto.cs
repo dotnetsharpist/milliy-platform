@@ -10,9 +10,6 @@ public class QuestionAttemptResultDto
     public decimal Score { get; set; }
     public QuestionType Type { get; set; }
     public long? QuestionGroupId { get; set; }
-    // Reference answer for FreeAnswer questions (graded against the typed text).
-    // Lives only on the results DTO so the review screen can show it after the
-    // attempt is completed — never exposed on the exam (start-test) DTOs.
     public string? CorrectAnswer { get; set; }
     public List<TranslationResultDto> Translations { get; set; } = [];
     public List<OptionAttemptResultDto> Options { get; set; } = [];
