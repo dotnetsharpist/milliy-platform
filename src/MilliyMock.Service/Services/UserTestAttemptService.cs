@@ -104,6 +104,7 @@ public class UserTestAttemptService(
                 .SelectAll(qg => qg.TestId == attempt.TestId && !qg.IsDeleted)
                 .Include(qg => qg.Translations)
                 .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+                .Include(qg => qg.Questions).ThenInclude(q => q.Options)
                 .Include(qg => qg.Options)
                 .ToListAsync();
 

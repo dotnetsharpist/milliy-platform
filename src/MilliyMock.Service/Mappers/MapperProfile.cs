@@ -69,6 +69,7 @@ public class MapperProfile : Profile
         CreateMap<Question, QuestionAttemptDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptResultDto>().ReverseMap();
         CreateMap<Question, QuestionAttemptForQuestionGroupDto>().ReverseMap();
+        CreateMap<Question, QuestionResultForGroupDto>().ReverseMap();
 
         // Question Explanation
         CreateMap<QuestionExplanation, CreateQuestionExplanationDto>().ReverseMap();
