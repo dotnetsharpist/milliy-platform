@@ -16,9 +16,14 @@ public class UserAnswerService(IUnitOfWork unitOfWork, IMapper mapper) : IUserAn
         var testAttempt = await unitOfWork.UserTestAttempts.SelectAsync(ta => ta.Id == dto.UserTestAttemptId);
         if (testAttempt is null) throw new MilliyMockException(404, "Test attempt not found");
 
-        var selectedOption = await unitOfWork.Options.SelectAsync(o => o.Id == dto.SelectedOptionId);
-        if (selectedOption is null) throw new MilliyMockException(404, "Option not found");
-        
+        if (dto.SelectedOptionId is null && dto.TextAnswer is null || dto.SelectedOptionId is not null && dto.TextAnswer is not null) throw new MilliyMockException();
+
+        if (dto.SelectedOptionId is not null)
+        {
+            var selectedOption = await unitOfWork.Options.SelectAsync(o => o.Id == dto.SelectedOptionId);
+            if (selectedOption is null) throw new MilliyMockException(404, "Option not found");
+        }
+
         var answer = mapper.Map<UserAnswer>(dto);
         await unitOfWork.UserAnswer.InsertAsync(answer);
         return await unitOfWork.UserAnswer.SaveAsync();
