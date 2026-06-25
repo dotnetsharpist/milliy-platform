@@ -92,7 +92,6 @@ public class MapperProfile : Profile
         
         // UserAnswer
         CreateMap<UserAnswer, CreateUserAnswerDto>().ReverseMap();
-        CreateMap<UpdateUserAnswerDto, UserAnswer>();
         CreateMap<UserAnswer, UserAnswerResultDto>().ReverseMap();
         CreateMap<UserAnswer, UserAnswerAttemptResultDto>();
         

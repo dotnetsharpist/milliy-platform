@@ -9,20 +9,15 @@ namespace MilliyMock.Controllers;
 [Route("api/user-answer")]
 public class UserAnswerController(IUserAnswerService answerService) : BaseController
 {
+    // Idempotent upsert: call on every answer change. Both verbs are kept so existing
+    // POST (create) and PUT (update) clients both work; consolidate to one on the frontend.
     [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> CreateAsync(CreateUserAnswerDto dto)
-        => Ok(new Response
-        {
-            Data = await answerService.CreateAsync(dto)
-        });
-    
     [HttpPut]
     [Authorize]
-    public async Task<IActionResult> UpdateAsync(UpdateUserAnswerDto dto)
+    public async Task<IActionResult> SetAsync(CreateUserAnswerDto dto)
         => Ok(new Response
         {
-            Data = await answerService.UpdateAsync(dto)
+            Data = await answerService.SetAnswerAsync(dto)
         });
 
 }

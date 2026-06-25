@@ -30,6 +30,13 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             .HasIndex(b => b.UserId)
             .IsUnique();
 
+        // One answer per (attempt, question). Partial filter mirrors the soft-delete
+        // query filter so a re-answer after a soft delete doesn't collide.
+        modelBuilder.Entity<UserAnswer>()
+            .HasIndex(ua => new { ua.UserTestAttemptId, ua.QuestionId })
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = false");
+
         /*
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
