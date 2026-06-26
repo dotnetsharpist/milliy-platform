@@ -41,6 +41,14 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
             Data = await service.GetResultsAsync(testAttemptId)
         });
 
+    [HttpGet("resume")]
+    [Authorize]
+    public async Task<IActionResult> Resume([FromQuery] long testAttemptId)
+        => Ok(new Response
+        {
+            Data = await service.ResumeAsync(testAttemptId)
+        });
+
     [HttpGet("get-by-test-id")]
     [Authorize]
     public async Task<IActionResult> GetByTestId([FromQuery] long testId)

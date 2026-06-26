@@ -9,6 +9,9 @@ public class TestAttemptResultsDto
     public long TestAttemptId { get; set; }
     public string Title { get; set; } = null!;
     public decimal TotalScore { get; set; }
+    public decimal MaxScore { get; set; }
+    public int CorrectCount { get; set; }
+    public int IncorrectCount { get; set; }
     public List<QuestionAttemptResultDto> Questions { get; set; } = [];
     public List<QuestionGroupAttemptResultDto> QuestionGroups { get; set; } = [];
     public List<UserAnswerAttemptResultDto> UserAnswers { get; set; } = [];

@@ -33,6 +33,7 @@ public class MapperProfile : Profile
         CreateMap<Test, UpdateTestDto>().ReverseMap();
         CreateMap<Test, TestResultDto>().ReverseMap();
         CreateMap<Test, StartTestResultDto>().ReverseMap();
+        CreateMap<Test, ResumeAttemptDto>();
         CreateMap<Test, TestAttemptResultsDto>();
         
         // QuestionGroup

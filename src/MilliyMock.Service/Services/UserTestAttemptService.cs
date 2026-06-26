@@ -80,6 +80,71 @@ public class UserTestAttemptService(
         }
     }
 
+    public async Task<ResumeAttemptDto> ResumeAsync(long testAttemptId)
+    {
+        try
+        {
+            logger.LogInformation("Resuming test attempt {testAttemptId}", testAttemptId);
+
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+
+            var attempt = await unitOfWork.UserTestAttempts
+                .SelectAll(ta => ta.Id == testAttemptId)
+                .Include(ta => ta.UserAnswers)
+                .FirstOrDefaultAsync();
+
+            if (attempt is null) throw new MilliyMockException(404, "Attempt not found");
+            if (attempt.UserId != userId) throw new MilliyMockException();
+
+            var test = await unitOfWork.Tests.SelectAll(t => t.Id == attempt.TestId && !t.IsDeleted)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
+                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
+                .FirstOrDefaultAsync();
+
+            if (test is null) throw new MilliyMockException(404, "Test not found");
+
+            var groupedQuestions = await unitOfWork.QuestionGroups
+                .SelectAll(qg => qg.TestId == attempt.TestId && !qg.IsDeleted)
+                .Include(qg => qg.Translations)
+                .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+                .Include(qg => qg.Options)
+                .ToListAsync();
+
+            // The window is StartedAt + the test's duration. Compare against the
+            // same UTC+5 clock StartedAt was stamped with. A non-positive remainder
+            // means the window has elapsed: finish the attempt now so a returning
+            // user gets a graded result instead of a resumable, already-late test.
+            var deadline = attempt.StartedAt.AddMinutes(test.DurationMinutes);
+            var remaining = deadline - TimeHelper.GetDateTime();
+            var remainingSeconds = (int)Math.Max(0, Math.Floor(remaining.TotalSeconds));
+
+            if (attempt.AttemptStatus != AttemptStatus.Completed && remainingSeconds == 0)
+            {
+                CompleteAttempt(attempt);
+                await unitOfWork.SaveChangesAsync();
+            }
+
+            var resume = mapper.Map<ResumeAttemptDto>(test);
+            resume.TestAttemptId = attempt.Id;
+            resume.TestId = attempt.TestId;
+            resume.RemainingSeconds = remainingSeconds;
+            resume.IsCompleted = attempt.AttemptStatus == AttemptStatus.Completed;
+            resume.QuestionGroups = mapper.Map<List<QuestionGroupAttemptDto>>(groupedQuestions);
+            resume.UserAnswers = mapper.Map<List<UserAnswerAttemptResultDto>>(attempt.UserAnswers);
+
+            return resume;
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error resuming test attempt {testAttemptId}", testAttemptId);
+            throw new MilliyMockException();
+        }
+    }
+
     public async Task<TestAttemptResultsDto> GetResultsAsync(long testAttemptId)
     {
         try
@@ -106,7 +171,7 @@ public class UserTestAttemptService(
         }
     }
 
-    public async Task<AttemptedTestResultDto> SubmitTest(long testAttemptId)
+    public async Task<SubmitTestResultDto> SubmitTest(long testAttemptId)
     {
         try
         {
@@ -114,9 +179,7 @@ public class UserTestAttemptService(
             var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
             var testAttempt = await unitOfWork.UserTestAttempts
-                .SelectAll(ta => ta.Id == testAttemptId /*&& ta.UserId == userId*/)
-                .Include(ta => ta.UserAnswers)
-                .Include(ta => ta.TempUser)
+                .SelectAll(ta => ta.Id == testAttemptId)
                 .FirstOrDefaultAsync();
 
             if (testAttempt is null)
@@ -127,98 +190,18 @@ public class UserTestAttemptService(
             if (testAttempt.AttemptStatus == AttemptStatus.Completed)
                 throw new MilliyMockException(400, "Test is already finished");
 
-            // Grading only needs each question's options (with IsCorrect) and, for
-            // Matching, the group's options. Translations/explanations are loaded
-            // by get-results for the review screen, not here — submit just scores.
-            var questions = await unitOfWork.Questions
-                .SelectAll(q => q.TestId == testAttempt.TestId && !q.IsDeleted)
-                .Include(q => q.Options)
-                .Include(q => q.QuestionGroup).ThenInclude(g => g.Options)
-                .ToListAsync();
-            
-            decimal totalScore = 0;
-            var correctCount = 0;
-            var incorrectCount = 0;
-            decimal maxScore = 0;
-
-            foreach (var question in questions)
-            {
-                var userAnswer = testAttempt.UserAnswers
-                    .FirstOrDefault(ua => ua.QuestionId == question.Id);
-
-                if (userAnswer == null)
-                    continue;
-
-                var isCorrect = false;
-
-                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-                switch (question.Type)
-                {
-                    case QuestionType.MultipleChoice:
-                    {
-                        if (userAnswer.SelectedOptionId != null)
-                        {
-                            var option = question.Options
-                                .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
-
-                            if (option != null && option.IsCorrect)
-                                isCorrect = true;
-                        }
-
-                        break;
-                    }
-
-                    case QuestionType.Matching:
-                    {
-                        if (userAnswer.SelectedOptionId != null && question.QuestionGroup != null)
-                        {
-                            var option = question.QuestionGroup.Options
-                                .FirstOrDefault(o => o.Id == userAnswer.SelectedOptionId);
-
-                            // IMPORTANT:
-                            // Matching correctness must still be defined per option
-                            if (option is { IsCorrect: true })
-                                isCorrect = true;
-                        }
-
-                        break;
-                    }
-
-                    case QuestionType.FreeAnswer:
-                    {
-                        isCorrect = MatchesFreeAnswer(userAnswer.TextAnswer, question.CorrectAnswer);
-
-                        break;
-                    }
-                }
-
-                if (isCorrect)
-                {
-                    totalScore += question.Score;
-                    correctCount++;
-                }
-                else incorrectCount++;
-
-                maxScore += question.Score;
-            }
-
-            testAttempt.TotalScore = totalScore;
-            testAttempt.AttemptStatus = AttemptStatus.Completed;
-            testAttempt.FinishedAt = DateTime.UtcNow;
+            // Submit is a pure state transition: mark the attempt finished. Scoring
+            // (TotalScore + correct/incorrect counts) is computed lazily by
+            // get-results, so finishing an attempt — including an expired one —
+            // never needs to load the questions or grade here.
+            CompleteAttempt(testAttempt);
 
             await unitOfWork.SaveChangesAsync();
 
-            // submit is a lean command: grade + mark completed, return only the
-            // score summary (built from data already loaded for grading). The
-            // client then reads the full review payload from get-results, so we
-            // don't duplicate that build here.
-            return new AttemptedTestResultDto
+            return new SubmitTestResultDto
             {
-                CorrectCount = correctCount,
-                IncorrectCount = incorrectCount,
-                MaxScore = maxScore,
-                TotalScore = totalScore,
-                TempUser = mapper.Map<TempUserResultDto>(testAttempt.TempUser)
+                TestAttemptId = testAttempt.Id,
+                AttemptStatus = testAttempt.AttemptStatus
             };
         }
         catch (MilliyMockException)
@@ -374,10 +357,11 @@ public class UserTestAttemptService(
         }
     }
 
-    // Shared graded-results builder for a completed attempt. Both GetResultsAsync
-    // (read-only) and SubmitTest (right after grading) return this same shape, so
-    // the client renders the explanation screen from a single response. The
-    // attempt must already be loaded with its UserAnswers.
+    // Builds the graded review payload for a completed attempt. Submit only marks
+    // the attempt finished; the score and the correct/incorrect tallies are
+    // derived here, on read, from the loaded questions and the user's answers — so
+    // there is one authoritative grading path feeding both the certificate and the
+    // results list. The attempt must already be loaded with its UserAnswers.
     private async Task<TestAttemptResultsDto> BuildAttemptResultsAsync(UserTestAttempt attempt)
     {
         var test = await unitOfWork.Tests.SelectAll(t => t.Id == attempt.TestId && !t.IsDeleted)
@@ -397,11 +381,99 @@ public class UserTestAttemptService(
 
         var results = mapper.Map<TestAttemptResultsDto>(test);
         results.TestAttemptId = attempt.Id;
-        results.TotalScore = attempt.TotalScore;
         results.QuestionGroups = mapper.Map<List<QuestionGroupAttemptResultDto>>(groupedQuestions);
         results.UserAnswers = mapper.Map<List<UserAnswerAttemptResultDto>>(attempt.UserAnswers);
 
+        var grade = GradeAttempt(EnumerateGradableQuestions(test, groupedQuestions), attempt.UserAnswers);
+        results.TotalScore = grade.TotalScore;
+        results.MaxScore = grade.MaxScore;
+        results.CorrectCount = grade.CorrectCount;
+        results.IncorrectCount = grade.IncorrectCount;
+
+        // Cache the score on the attempt so the history list (GetByUserId) reflects
+        // it without re-grading. Idempotent — recomputing yields the same value.
+        if (attempt.TotalScore != grade.TotalScore)
+        {
+            attempt.TotalScore = grade.TotalScore;
+            await unitOfWork.SaveChangesAsync();
+        }
+
         return results;
+    }
+
+    // Marks an attempt finished. Shared by submit and the expiry path so both set
+    // the status, finish time and elapsed span the same way. Uses the same UTC+5
+    // clock as StartedAt so TimeSpent is a real duration.
+    private static void CompleteAttempt(UserTestAttempt attempt)
+    {
+        attempt.AttemptStatus = AttemptStatus.Completed;
+        attempt.FinishedAt = TimeHelper.GetDateTime();
+        attempt.TimeSpent = attempt.FinishedAt.Value - attempt.StartedAt;
+    }
+
+    // Flattens a test's gradable questions to (question, owning group) pairs:
+    // ungrouped questions carry a null group; grouped sub-questions carry their
+    // parent so Matching correctness can be resolved from the group's options.
+    private static IEnumerable<(Question Question, QuestionGroup? Group)> EnumerateGradableQuestions(
+        Test test, IEnumerable<QuestionGroup> groups)
+    {
+        foreach (var question in test.Questions)
+            yield return (question, null);
+
+        foreach (var group in groups)
+            foreach (var question in group.Questions)
+                yield return (question, group);
+    }
+
+    // Single grading pass over every gradable question. MaxScore counts all
+    // questions (the achievable total); correct/incorrect count only answered
+    // ones, so an omitted question is neither. Matching grades against the parent
+    // group's options; FreeAnswer uses MatchesFreeAnswer.
+    private static (decimal TotalScore, decimal MaxScore, int CorrectCount, int IncorrectCount) GradeAttempt(
+        IEnumerable<(Question Question, QuestionGroup? Group)> questions,
+        IEnumerable<UserAnswer> userAnswers)
+    {
+        var answerByQuestionId = userAnswers
+            .GroupBy(ua => ua.QuestionId)
+            .ToDictionary(group => group.Key, group => group.First());
+
+        decimal totalScore = 0;
+        decimal maxScore = 0;
+        var correctCount = 0;
+        var incorrectCount = 0;
+
+        foreach (var (question, group) in questions)
+        {
+            maxScore += question.Score;
+
+            if (!answerByQuestionId.TryGetValue(question.Id, out var userAnswer))
+                continue;
+
+            var isCorrect = question.Type switch
+            {
+                QuestionType.MultipleChoice =>
+                    userAnswer.SelectedOptionId is { } mcOption &&
+                    question.Options.Any(o => o.Id == mcOption && o.IsCorrect),
+                QuestionType.Matching =>
+                    userAnswer.SelectedOptionId is { } matchOption && group != null &&
+                    group.Options.Any(o => o.Id == matchOption && o.IsCorrect),
+                QuestionType.FreeAnswer =>
+                    MatchesFreeAnswer(userAnswer.TextAnswer, question.CorrectAnswer),
+                _ => false
+            };
+
+            if (isCorrect)
+            {
+                totalScore += question.Score;
+                correctCount++;
+            }
+            else
+            {
+                incorrectCount++;
+            }
+        }
+
+        return (totalScore, maxScore, correctCount, incorrectCount);
     }
 
     // A FreeAnswer is correct when it matches any of the author's accepted forms.

@@ -7,6 +7,7 @@ public class StartTestResultDto
 {
     public long TestAttemptId { get; set; }
     public string Title { get; set; } = null!;
+    public int DurationMinutes { get; set; }
     public List<QuestionAttemptDto> Questions { get; set; } = [];
     public List<QuestionGroupAttemptDto> QuestionGroups { get; set; } = [];
 }
