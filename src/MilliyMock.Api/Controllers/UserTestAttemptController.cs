@@ -50,7 +50,7 @@ public class UserTestAttemptController(IUserTestAttemptService service) : BaseCo
         });
 
     [HttpPost("submit")]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> SubmitAsync(long testAttemptId)
         => Ok(new Response
         {

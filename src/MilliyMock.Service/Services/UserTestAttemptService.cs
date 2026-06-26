@@ -93,28 +93,7 @@ public class UserTestAttemptService(
 
             if (attempt is null) throw new MilliyMockException(404, "Attempt not found");
 
-            var test = await unitOfWork.Tests.SelectAll(t => t.Id == attempt.TestId && !t.IsDeleted)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
-                .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
-                .FirstOrDefaultAsync();
-
-            if (test is null) throw new MilliyMockException(404, "Test not found");
-
-            var groupedQuestions = await unitOfWork.QuestionGroups
-                .SelectAll(qg => qg.TestId == attempt.TestId && !qg.IsDeleted)
-                .Include(qg => qg.Translations)
-                .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
-                .Include(qg => qg.Questions).ThenInclude(q => q.Options)
-                .Include(qg => qg.Options)
-                .ToListAsync();
-
-            var results = mapper.Map<TestAttemptResultsDto>(test);
-            results.TestAttemptId = attempt.Id;
-            results.TotalScore = attempt.TotalScore;
-            results.QuestionGroups = mapper.Map<List<QuestionGroupAttemptResultDto>>(groupedQuestions);
-            results.UserAnswers = mapper.Map<List<UserAnswerAttemptResultDto>>(attempt.UserAnswers);
-
-            return results;
+            return await BuildAttemptResultsAsync(attempt);
         }
         catch (MilliyMockException)
         {
@@ -132,7 +111,7 @@ public class UserTestAttemptService(
         try
         {
             logger.LogInformation("Submitting test attempt for testAttemptId {testAttemptId}", testAttemptId);
-            //var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
+            var userId = HttpContextHelper.UserId ?? throw new MilliyMockException(409, "Unauthorized");
 
             var testAttempt = await unitOfWork.UserTestAttempts
                 .SelectAll(ta => ta.Id == testAttemptId /*&& ta.UserId == userId*/)
@@ -143,18 +122,18 @@ public class UserTestAttemptService(
             if (testAttempt is null)
                 throw new MilliyMockException(404, "No test attempt found");
 
+            if (testAttempt.UserId != userId) throw new MilliyMockException();
+
             if (testAttempt.AttemptStatus == AttemptStatus.Completed)
                 throw new MilliyMockException(400, "Test is already finished");
 
-            // Load questions with options
+            // Grading only needs each question's options (with IsCorrect) and, for
+            // Matching, the group's options. Translations/explanations are loaded
+            // by get-results for the review screen, not here — submit just scores.
             var questions = await unitOfWork.Questions
                 .SelectAll(q => q.TestId == testAttempt.TestId && !q.IsDeleted)
                 .Include(q => q.Options)
-                .Include(q => q.Translations)
-                .Include(q => q.QuestionGroup).ThenInclude(qg => qg.Translations)
                 .Include(q => q.QuestionGroup).ThenInclude(g => g.Options)
-                .Include(q => q.QuestionGroup).ThenInclude(g => g.QuestionExplanation).ThenInclude(qe => qe.Translations)
-                .Include(q => q.QuestionExplanation).ThenInclude(qe => qe.Translations)
                 .ToListAsync();
             
             decimal totalScore = 0;
@@ -207,12 +186,7 @@ public class UserTestAttemptService(
 
                     case QuestionType.FreeAnswer:
                     {
-                        if (!string.IsNullOrWhiteSpace(userAnswer.TextAnswer) &&
-                            !string.IsNullOrWhiteSpace(question.CorrectAnswer))
-                        {
-                            isCorrect = Normalize(userAnswer.TextAnswer)
-                                        == Normalize(question.CorrectAnswer);
-                        }
+                        isCorrect = MatchesFreeAnswer(userAnswer.TextAnswer, question.CorrectAnswer);
 
                         break;
                     }
@@ -234,15 +208,17 @@ public class UserTestAttemptService(
 
             await unitOfWork.SaveChangesAsync();
 
-            return new AttemptedTestResultDto()
+            // submit is a lean command: grade + mark completed, return only the
+            // score summary (built from data already loaded for grading). The
+            // client then reads the full review payload from get-results, so we
+            // don't duplicate that build here.
+            return new AttemptedTestResultDto
             {
                 CorrectCount = correctCount,
                 IncorrectCount = incorrectCount,
                 MaxScore = maxScore,
                 TotalScore = totalScore,
-                TempUser = mapper.Map<TempUserResultDto>(testAttempt.TempUser),
-                UserAnswers = mapper.Map<List<UserAnswerResultDto>>(testAttempt.UserAnswers),
-                Questions = mapper.Map<List<QuestionResultDto>>(questions)
+                TempUser = mapper.Map<TempUserResultDto>(testAttempt.TempUser)
             };
         }
         catch (MilliyMockException)
@@ -398,8 +374,64 @@ public class UserTestAttemptService(
         }
     }
 
+    // Shared graded-results builder for a completed attempt. Both GetResultsAsync
+    // (read-only) and SubmitTest (right after grading) return this same shape, so
+    // the client renders the explanation screen from a single response. The
+    // attempt must already be loaded with its UserAnswers.
+    private async Task<TestAttemptResultsDto> BuildAttemptResultsAsync(UserTestAttempt attempt)
+    {
+        var test = await unitOfWork.Tests.SelectAll(t => t.Id == attempt.TestId && !t.IsDeleted)
+            .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Options)
+            .Include(t => t.Questions.Where(q => q.QuestionGroupId == null && !q.IsDeleted)).ThenInclude(q => q.Translations)
+            .FirstOrDefaultAsync();
+
+        if (test is null) throw new MilliyMockException(404, "Test not found");
+
+        var groupedQuestions = await unitOfWork.QuestionGroups
+            .SelectAll(qg => qg.TestId == attempt.TestId && !qg.IsDeleted)
+            .Include(qg => qg.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Translations)
+            .Include(qg => qg.Questions).ThenInclude(q => q.Options)
+            .Include(qg => qg.Options)
+            .ToListAsync();
+
+        var results = mapper.Map<TestAttemptResultsDto>(test);
+        results.TestAttemptId = attempt.Id;
+        results.TotalScore = attempt.TotalScore;
+        results.QuestionGroups = mapper.Map<List<QuestionGroupAttemptResultDto>>(groupedQuestions);
+        results.UserAnswers = mapper.Map<List<UserAnswerAttemptResultDto>>(attempt.UserAnswers);
+
+        return results;
+    }
+
+    // A FreeAnswer is correct when it matches any of the author's accepted forms.
+    // CorrectAnswer may list several, separated by "||" — typically a LaTeX form
+    // and a plain form of the same value, e.g. "\frac{4}{7}||4/7". A student who
+    // types either form should be marked correct, so we compare against each
+    // variant, not the joined string.
+    private static bool MatchesFreeAnswer(string? userAnswer, string? correctAnswer)
+    {
+        if (string.IsNullOrWhiteSpace(userAnswer) || string.IsNullOrWhiteSpace(correctAnswer))
+            return false;
+
+        var normalizedUser = Normalize(userAnswer);
+        if (normalizedUser.Length == 0)
+            return false;
+
+        return correctAnswer
+            .Split("||", StringSplitOptions.RemoveEmptyEntries)
+            .Select(Normalize)
+            .Any(accepted => accepted.Length > 0 && accepted == normalizedUser);
+    }
+
+    // Case- and whitespace-insensitive. LaTeX spacing isn't significant
+    // (\frac {4}{7} == \frac{4}{7}) and the editor pads inline math with spaces,
+    // so we drop all whitespace rather than only trimming the ends.
     private static string Normalize(string input)
     {
-        return input.Trim().ToLower();
+        return new string(input
+            .Where(character => !char.IsWhiteSpace(character))
+            .Select(char.ToLowerInvariant)
+            .ToArray());
     }
 }
