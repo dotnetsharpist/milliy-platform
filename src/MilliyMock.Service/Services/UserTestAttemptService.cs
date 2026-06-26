@@ -1,3 +1,4 @@
+using System.Text;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -210,8 +211,17 @@ public class UserTestAttemptService(
                         if (!string.IsNullOrWhiteSpace(userAnswer.TextAnswer) &&
                             !string.IsNullOrWhiteSpace(question.CorrectAnswer))
                         {
-                            isCorrect = Normalize(userAnswer.TextAnswer)
-                                        == Normalize(question.CorrectAnswer);
+                            var normalizedUserAnswer = Normalize(userAnswer.TextAnswer);
+
+                            // CorrectAnswer may hold several accepted forms separated by "||"
+                            // (e.g. "Tug'shoda||Tug'shoda (692-724)"). The answer counts as
+                            // correct when the student's input matches ANY of them after
+                            // normalization, so trivial format differences (case, spacing,
+                            // apostrophe/dash style, periods) never fail a genuinely correct
+                            // answer.
+                            isCorrect = question.CorrectAnswer
+                                .Split("||", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                .Any(variant => Normalize(variant) == normalizedUserAnswer);
                         }
 
                         break;
@@ -398,8 +408,54 @@ public class UserTestAttemptService(
         }
     }
 
-    private static string Normalize(string input)
+    // Normalizes a free-answer string so trivial differences never fail grading.
+    // Lower-cases, trims, collapses inner whitespace, drops periods, and unifies
+    // the many apostrophe characters (Uzbek o'/g' may be typed as ' ' ` etc.) and
+    // dash characters (en/em dash, minus) so they no longer affect matching.
+    private static string Normalize(string? input)
     {
-        return input.Trim().ToLower();
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        var builder = new StringBuilder(input.Length);
+
+        foreach (var ch in input.Trim().ToLowerInvariant())
+        {
+            switch (ch)
+            {
+                // Drop apostrophe-like marks and periods entirely.
+                case '\'':
+                case '‘':
+                case '’':
+                case '`':
+                case 'ʻ':
+                case 'ʼ':
+                case 'ʽ':
+                case '.':
+                    continue;
+
+                // Collapse dash variants to a plain hyphen.
+                case '–':
+                case '—':
+                case '−':
+                    builder.Append('-');
+                    break;
+
+                // Collapse any whitespace run to a single space.
+                case ' ':
+                case '\t':
+                case '\n':
+                case '\r':
+                    if (builder.Length > 0 && builder[^1] != ' ')
+                        builder.Append(' ');
+                    break;
+
+                default:
+                    builder.Append(ch);
+                    break;
+            }
+        }
+
+        return builder.ToString().Trim();
     }
 }

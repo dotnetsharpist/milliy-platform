@@ -25,6 +25,8 @@ public class QuestionService(
         {
             var question = mapper.Map<Question>(dto);
             question.CreatedBy = HttpContextHelper.UserId;
+            // Keep stored free-answer keys clean (no stray surrounding whitespace).
+            question.CorrectAnswer = question.CorrectAnswer?.Trim();
 
             if (dto.QuestionGroupId is not null)
             {
@@ -205,6 +207,8 @@ public class QuestionService(
                             question.CreatedBy = HttpContextHelper.UserId;
                             question.TestId = dto.TestId;
                             question.QuestionGroup = questionGroup;
+                            // Keep stored free-answer keys clean (no stray surrounding whitespace).
+                            question.CorrectAnswer = question.CorrectAnswer?.Trim();
 
                             if (questionDto.TextUz is not null)
                             {
@@ -271,6 +275,8 @@ public class QuestionService(
                     var question = mapper.Map<Question>(questionDto);
                     question.CreatedBy = HttpContextHelper.UserId;
                     question.TestId = dto.TestId;
+                    // Keep stored free-answer keys clean (no stray surrounding whitespace).
+                    question.CorrectAnswer = question.CorrectAnswer?.Trim();
 
                     if (questionDto.TextUz is not null)
                     {
