@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -390,6 +391,12 @@ public class UserTestAttemptService(
         results.CorrectCount = grade.CorrectCount;
         results.IncorrectCount = grade.IncorrectCount;
 
+        // Per-answer correctness from the same pass, so the client renders badges
+        // straight from it instead of grading again.
+        foreach (var answer in results.UserAnswers)
+            answer.IsCorrect =
+                grade.IsCorrectByQuestionId.TryGetValue(answer.QuestionId, out var isCorrect) && isCorrect;
+
         // Cache the score on the attempt so the history list (GetByUserId) reflects
         // it without re-grading. Idempotent — recomputing yields the same value.
         if (attempt.TotalScore != grade.TotalScore)
@@ -417,7 +424,12 @@ public class UserTestAttemptService(
     private static IEnumerable<(Question Question, QuestionGroup? Group)> EnumerateGradableQuestions(
         Test test, IEnumerable<QuestionGroup> groups)
     {
-        foreach (var question in test.Questions)
+        // test.Questions is loaded with a QuestionGroupId == null filter, but EF
+        // relationship fixup also attaches the grouped questions (materialized by
+        // the separate groups query, same TestId) onto this navigation — defeating
+        // the filter. Re-filter to ungrouped so grouped sub-questions are graded
+        // once, via the groups loop below, not twice.
+        foreach (var question in test.Questions.Where(question => question.QuestionGroupId == null))
             yield return (question, null);
 
         foreach (var group in groups)
@@ -425,11 +437,21 @@ public class UserTestAttemptService(
                 yield return (question, group);
     }
 
+    // Outcome of a single grading pass: the aggregate tallies plus per-answered-
+    // question correctness, so callers can stamp IsCorrect onto each answer
+    // without re-grading.
+    private sealed record AttemptGrade(
+        decimal TotalScore,
+        decimal MaxScore,
+        int CorrectCount,
+        int IncorrectCount,
+        Dictionary<long, bool> IsCorrectByQuestionId);
+
     // Single grading pass over every gradable question. MaxScore counts all
     // questions (the achievable total); correct/incorrect count only answered
     // ones, so an omitted question is neither. Matching grades against the parent
     // group's options; FreeAnswer uses MatchesFreeAnswer.
-    private static (decimal TotalScore, decimal MaxScore, int CorrectCount, int IncorrectCount) GradeAttempt(
+    private static AttemptGrade GradeAttempt(
         IEnumerable<(Question Question, QuestionGroup? Group)> questions,
         IEnumerable<UserAnswer> userAnswers)
     {
@@ -441,6 +463,7 @@ public class UserTestAttemptService(
         decimal maxScore = 0;
         var correctCount = 0;
         var incorrectCount = 0;
+        var isCorrectByQuestionId = new Dictionary<long, bool>();
 
         foreach (var (question, group) in questions)
         {
@@ -462,6 +485,8 @@ public class UserTestAttemptService(
                 _ => false
             };
 
+            isCorrectByQuestionId[question.Id] = isCorrect;
+
             if (isCorrect)
             {
                 totalScore += question.Score;
@@ -473,7 +498,7 @@ public class UserTestAttemptService(
             }
         }
 
-        return (totalScore, maxScore, correctCount, incorrectCount);
+        return new AttemptGrade(totalScore, maxScore, correctCount, incorrectCount, isCorrectByQuestionId);
     }
 
     // A FreeAnswer is correct when it matches any of the author's accepted forms.
@@ -496,14 +521,44 @@ public class UserTestAttemptService(
             .Any(accepted => accepted.Length > 0 && accepted == normalizedUser);
     }
 
-    // Case- and whitespace-insensitive. LaTeX spacing isn't significant
-    // (\frac {4}{7} == \frac{4}{7}) and the editor pads inline math with spaces,
-    // so we drop all whitespace rather than only trimming the ends.
+    // \dfrac/\tfrac are display-size variants of \frac; the lookahead keeps a
+    // longer command (none standard, but defensive) from being mangled.
+    private static readonly Regex DisplayFrac =
+        new(@"\\[dt]frac(?![a-z])", RegexOptions.Compiled);
+
+    // \left / \right only size the delimiter that follows; the value is the same
+    // with or without them. The lookahead avoids eating \leftarrow etc.
+    private static readonly Regex LeftRight =
+        new(@"\\(?:left|right)(?![a-z])", RegexOptions.Compiled);
+
+    // Braces wrapping a single atom — one character (\sqrt{2}) or one command
+    // ({\alpha}) — are cosmetic in LaTeX, so we drop them to make \sqrt2 == \sqrt{2}
+    // and x^2 == x^{2}. Multi-token groups like {16\sqrt2} are left intact, so
+    // genuinely different values (\frac{1}{23} vs \frac{12}{3}) never collapse.
+    private static readonly Regex SingleAtomBraces =
+        new(@"\{(\\[a-z]+|[^{}\\])\}", RegexOptions.Compiled);
+
+    // Normalizes a math answer for comparison: drops all whitespace (LaTeX spacing
+    // isn't significant and the editor pads inline math with spaces), lowercases,
+    // folds display-only LaTeX (\dfrac/\tfrac/\left/\right), and strips single-atom
+    // braces (repeatedly, so nested wrappers collapse too).
     private static string Normalize(string input)
     {
-        return new string(input
+        var normalized = new string(input
             .Where(character => !char.IsWhiteSpace(character))
             .Select(char.ToLowerInvariant)
             .ToArray());
+
+        normalized = DisplayFrac.Replace(normalized, @"\frac");
+        normalized = LeftRight.Replace(normalized, string.Empty);
+
+        string previous;
+        do
+        {
+            previous = normalized;
+            normalized = SingleAtomBraces.Replace(normalized, "$1");
+        } while (normalized != previous);
+
+        return normalized;
     }
 }
