@@ -15,7 +15,7 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
     private readonly string Password = configuration["Email:Password"];
     private readonly int Port = 587;
     
-    public async Task<bool> SendAsync(EmailMessage emailMessage)
+    public async Task<bool> SendRegisterOtpAsync(EmailMessage emailMessage)
     {
         try
         {
@@ -26,15 +26,17 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
             var templatePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "Templates",
-                "confirm-email.html");
+                "otp-verification-email.html");
             
             var htmlBody = await File.ReadAllTextAsync(templatePath);
-            htmlBody = htmlBody.Replace("{{VERIFY_LINK}}", emailMessage.ConfirmationLink);
+            htmlBody = htmlBody.Replace("{{FIRST_NAME}}", emailMessage.FirstName);
+            htmlBody = htmlBody.Replace("{{OTP_CODE}}", emailMessage.OtpCode);
+            htmlBody = htmlBody.Replace("{{EXPIRY_MINUTES}}", emailMessage.ExpiryMinutes.ToString());
 
             var message = new MailMessage
             {
                 From = new MailAddress(Email, Email),
-                Subject = "Hello",
+                Subject = "Salom",
                 Body = htmlBody,
                 IsBodyHtml = true
             };

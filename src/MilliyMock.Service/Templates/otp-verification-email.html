@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  MilliyMock — Email verification (OTP) template
+  ----------------------------------------------------------------------------
+  Placeholders to inject from your backend:
+    {{OTP_CODE}}        -> the 6-digit code, e.g. "482913"
+    {{EXPIRY_MINUTES}}  -> how long the code is valid, e.g. "10"
+    {{FIRST_NAME}}      -> recipient's first name (optional). If you don't have
+                           one, just delete the "Salom {{FIRST_NAME}}," clause.
+  Support: Telegram https://t.me/Milliymocksupport (shown in the footer).
+  Logo: hosted at https://milliymock.uz/og-image.jpg. Swap for a transparent
+  PNG if you want it to blend on dark-mode clients.
+  ============================================================================
+-->
+<html lang="uz" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Emailingizni tasdiqlang</title>
+
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+
+  <!-- DM Sans (renders in Apple Mail, iOS, some others; safe fallback elsewhere) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- Resets ---- */
+    html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+    * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; border-collapse: collapse !important; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    a { text-decoration: none; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+    /* ---- Mobile ---- */
+    @media only screen and (max-width: 600px) {
+      .sm-w-full { width: 100% !important; }
+      .sm-px { padding-left: 24px !important; padding-right: 24px !important; }
+      .sm-py { padding-top: 32px !important; padding-bottom: 32px !important; }
+      .otp-code { font-size: 38px !important; letter-spacing: 10px !important; }
+    }
+
+    /* ---- Dark mode (supported clients) ---- */
+    @media (prefers-color-scheme: dark) {
+      .body-bg { background-color: #15130f !important; }
+      .card { background-color: #1c1a16 !important; border-color: #2a2722 !important; }
+      .ink { color: #faf8f4 !important; }
+      .muted { color: #a39e94 !important; }
+      .rule { border-color: #2a2722 !important; background-color: #2a2722 !important; }
+      .code-box { background-color: #15130f !important; border-color: #2a2722 !important; }
+      .badge { background-color: #15130f !important; border-color: #2a2722 !important; }
+      .logo-plate { background-color: #ffffff !important; }
+    }
+  </style>
+</head>
+
+<body class="body-bg" style="margin:0; padding:0; width:100%; background-color:#f0ece5;">
+
+  <!-- Preheader: shown in inbox preview, hidden in the body -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#f0ece5; opacity:0;">
+    MilliyMock tasdiqlash kodingiz: {{OTP_CODE}} — {{EXPIRY_MINUTES}} daqiqadan soʻng amal qilmaydi.
+    &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="body-bg" style="background-color:#f0ece5;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <!-- Container -->
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" class="sm-w-full" style="width:560px; max-width:560px;">
+
+          <!-- Brand lockup -->
+          <tr>
+            <td align="center" style="padding:0 0 28px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="middle" class="logo-plate" style="background-color:#ffffff; border:1px solid #e8e3da; border-radius:12px; padding:8px; line-height:0;">
+                    <img src="https://milliymock.uz/og-image.jpg" width="36" height="36" alt="MilliyMock" style="display:block; width:36px; height:36px; border-radius:6px; object-fit:contain;">
+                  </td>
+                  <td valign="middle" style="padding-left:12px;">
+                    <span class="ink" style="font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; color:#1a1814;">MilliyMock</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td class="card" style="background-color:#ffffff; border:1px solid #e8e3da; border-radius:20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                <!-- Header text -->
+                <tr>
+                  <td class="sm-px sm-py" style="padding:48px 48px 0 48px;">
+                    <p class="muted" style="margin:0 0 10px 0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#8a857c;">
+                      Emailni tasdiqlash
+                    </p>
+                    <h1 class="ink" style="margin:0 0 14px 0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:28px; line-height:1.25; font-weight:700; letter-spacing:-0.5px; color:#1a1814;">
+                      Email manzilingizni tasdiqlang
+                    </h1>
+                    <p class="muted" style="margin:0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#6b6760;">
+                      Salom {{FIRST_NAME}}, MilliyMock hisobingizni yakunlash uchun quyidagi kod yordamida emailingizni tasdiqlang.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- OTP code -->
+                <tr>
+                  <td class="sm-px" style="padding:32px 48px 8px 48px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td class="code-box" align="center" style="background-color:#faf8f4; border:1px solid #e8e3da; border-radius:14px; padding:26px 16px;">
+                          <div class="otp-code ink" style="font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:44px; line-height:1; font-weight:700; letter-spacing:14px; color:#1a1814; padding-left:14px;">{{OTP_CODE}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Expiry note -->
+                <tr>
+                  <td class="sm-px" align="center" style="padding:14px 48px 0 48px;">
+                    <p class="muted" style="margin:0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:1.6; color:#8a857c;">
+                      Ushbu kod <span class="ink" style="color:#1a1814; font-weight:600;">{{EXPIRY_MINUTES}} daqiqadan</span> soʻng amal qilmaydi. Uni hech kimga bermang.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                  <td class="sm-px" style="padding:32px 48px 0 48px;">
+                    <div class="rule" style="height:1px; line-height:1px; font-size:0; background-color:#ece8e0;">&nbsp;</div>
+                  </td>
+                </tr>
+
+                <!-- Security note -->
+                <tr>
+                  <td class="sm-px" style="padding:24px 48px 48px 48px;">
+                    <p class="muted" style="margin:0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:1.65; color:#a39e94;">
+                      Bu kodni siz soʻramadingizmi? Ushbu xatni bemalol eʼtiborsiz qoldiring — hisobingiz xavfsiz qoladi va hech qanday oʻzgarish kiritilmaydi.
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:28px 24px 8px 24px;">
+              <p class="muted" style="margin:0 0 6px 0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#8a857c;">
+                Yordam kerakmi? Biz bilan bogʻlaning:
+                <a href="https://t.me/Milliymocksupport" class="ink" style="color:#1a1814; font-weight:600; text-decoration:none;">t.me/Milliymocksupport</a>
+              </p>
+              <p class="muted" style="margin:0; font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#a39e94;">
+                &copy; MilliyMock · Milliy sertifikat testlari platformasi
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Container -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

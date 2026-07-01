@@ -4,5 +4,5 @@ namespace MilliyMock.Service.Interfaces;
 
 public interface IEmailService
 {
-    public Task<bool> SendAsync(EmailMessage emailMessage);
+    public Task<bool> SendRegisterOtpAsync(EmailMessage emailMessage);
 }

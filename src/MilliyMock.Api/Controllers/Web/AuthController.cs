@@ -40,13 +40,35 @@ public class AuthController(IAuthService authService) : BaseController
             Data = await authService.GoogleLogin(dto)
         });
 
+    /*
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> RegisterAsync(CreateUserDto dto)
+    public async Task<IActionResult> RegisterAsync(RegisterDto dto)
         => Ok(new Response
         {
             Code = 200,
             Message = "Ok👍🏿",
             Data = await authService.Register(dto)
+        });
+        */
+
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmailAsync(VerifyEmailDto dto)
+        => Ok(new Response
+        {
+            Code = 200,
+            Message = "Ok👍🏿",
+            Data = await authService.VerifyEmail(dto)
+        });
+
+    [HttpPost("resend-otp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResendOtpAsync(ResendOtpDto dto)
+        => Ok(new Response
+        {
+            Code = 200,
+            Message = "Ok👍🏿",
+            Data = await authService.ResendOtp(dto)
         });
 }

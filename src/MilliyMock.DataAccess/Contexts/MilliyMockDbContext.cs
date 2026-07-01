@@ -22,6 +22,10 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        modelBuilder.Entity<User>()
+            .Property(u => u.PhoneNumber)
+            .HasMaxLength(15);
+
         modelBuilder.Entity<BotUser>()
             .HasIndex(bu => bu.TgUserId)
             .IsUnique();
@@ -29,6 +33,7 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<UserBalance>()
             .HasIndex(b => b.UserId)
             .IsUnique();
+        
 
         // One answer per (attempt, question). Partial filter mirrors the soft-delete
         // query filter so a re-answer after a soft delete doesn't collide.

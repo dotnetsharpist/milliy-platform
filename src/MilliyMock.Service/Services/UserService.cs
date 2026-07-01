@@ -30,8 +30,16 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper) : IUserService
     public async ValueTask<bool> Update(UpdateUserDto dto)
     {
         var userId = HttpContextHelper.UserId ?? throw new MilliyMockException();
+
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber) && !dto.PhoneNumber.All(char.IsDigit))
+            throw new MilliyMockException(400, "Phone number must contain digits only");
+
         var user = await unitOfWork.Users
             .SelectAsync(u => u.Id == userId);
+
+        var checkPhoneNumber = await unitOfWork.Users.SelectAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != userId);
+        if (checkPhoneNumber is not null)
+            throw new MilliyMockException(409, "User with this Phone Number already exists");
 
         if (user is null) throw new MilliyMockException();
 

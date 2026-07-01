@@ -24,9 +24,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Templates\confirm-email.html">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="Templates\otp-verification-email.html">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Templates\forgot-password-email.html">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

@@ -10,25 +10,146 @@ using MilliyMock.Service.Dtos.Auth;
 using MilliyMock.Service.Dtos.Users;
 using MilliyMock.Service.Interfaces;
 using MilliyMock.Shared.Helpers;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using MilliyMock.Service.Dtos.Email;
+using MilliyMock.Service.Models;
 
 
 namespace MilliyMock.Service.Services;
 
 public class AuthService(
-    IUnitOfWork unitOfWork, 
+    IUnitOfWork unitOfWork,
+    IEmailService emailService,
     IMapper mapper,
     ILogger<AuthService> logger,
+    IMemoryCache memoryCache,
     IConfiguration configuration) : IAuthService
 {
     private readonly IConfiguration _configuration = configuration.GetSection("Jwt");
 
-    public Task<string> Register(CreateUserDto dto)
+    private static readonly TimeSpan OtpLifetime = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan OtpResendCooldown = TimeSpan.FromMinutes(1);
+
+    public async Task<string> Register(RegisterDto dto)
     {
-        throw new MilliyMockException();
+        try
+        {
+            logger.LogInformation("Registration attempt for email {email}", dto.Email);
+
+            var existing = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
+            if (existing is not null)
+            {
+                if (existing.EmailConfirmed)
+                    throw new MilliyMockException(409, "This email is already registered.");
+
+                // A previous, never-verified attempt — refresh the details and re-issue
+                // a code (cooldown-guarded) instead of creating a duplicate account.
+                EnsureCooldownElapsed(existing.Email!);
+
+                existing.FirstName = dto.FirstName;
+                existing.LastName = dto.LastName;
+                existing.FatherName = dto.FatherName;
+                existing.PasswordHash = PasswordHelper.Hash(dto.Password);
+                unitOfWork.Users.Update(existing);
+                await unitOfWork.SaveChangesAsync();
+
+                await IssueAndSendOtpAsync(existing);
+                return "A new verification code has been sent to your email.";
+            }
+
+            var user = new User
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                FatherName = dto.FatherName,
+                Email = dto.Email,
+                PasswordHash = PasswordHelper.Hash(dto.Password),
+                EmailConfirmed = false
+            };
+            await unitOfWork.Users.InsertAsync(user);
+            await unitOfWork.SaveChangesAsync();
+
+            await IssueAndSendOtpAsync(user);
+            return "A verification code has been sent to your email.";
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during registration for email {email}", dto.Email);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<LoginResultDto> VerifyEmail(VerifyEmailDto dto)
+    {
+        try
+        {
+            logger.LogInformation("Email verification attempt for email {email}", dto.Email);
+
+            if (!memoryCache.TryGetValue(OtpCacheKey(dto.Email), out OtpEntry? entry) || entry is null)
+                throw new MilliyMockException(400,
+                    "The verification code has expired or was never requested. Please request a new one.");
+
+            if (entry.Code != dto.Code)
+                throw new MilliyMockException(400, "Invalid verification code");
+
+            var user = await unitOfWork.Users.SelectAsync(u => u.Id == entry.UserId);
+            if (user is null) throw new MilliyMockException(404, "User not found");
+
+            user.EmailConfirmed = true;
+            unitOfWork.Users.Update(user);
+            await unitOfWork.SaveChangesAsync();
+
+            memoryCache.Remove(OtpCacheKey(dto.Email));
+
+            return new LoginResultDto
+            {
+                Token = GenerateToken(user),
+                User = mapper.Map<UserResultDto>(user)
+            };
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during email verification for email {email}", dto.Email);
+            throw new MilliyMockException();
+        }
+    }
+
+    public async Task<string> ResendOtp(ResendOtpDto dto)
+    {
+        try
+        {
+            logger.LogInformation("OTP resend attempt for email {email}", dto.Email);
+
+            var user = await unitOfWork.Users.SelectAsync(u => u.Email == dto.Email);
+            if (user is null) throw new MilliyMockException(404, "User not found");
+            if (user.EmailConfirmed) throw new MilliyMockException(409, "This email is already verified.");
+
+            EnsureCooldownElapsed(user.Email!);
+
+            await IssueAndSendOtpAsync(user);
+            return "A new verification code has been sent to your email.";
+        }
+        catch (MilliyMockException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during otp resend for email {email}", dto.Email);
+            throw new MilliyMockException();
+        }
     }
 
     public async Task<LoginResultDto> TelegramLogin(TelegramLoginDto dto)
@@ -185,6 +306,9 @@ public class AuthService(
             if (!PasswordHelper.Verify(dto.Password, user.PasswordHash))
                 throw new MilliyMockException(400, "Password or email is incorrect");
 
+            if (!user.EmailConfirmed)
+                throw new MilliyMockException(403, "Please verify your email before logging in.");
+
             return new LoginResultDto
             {
                 Token = GenerateToken(user),
@@ -257,4 +381,41 @@ public class AuthService(
 
         return computedHash == dto.Hash;
     }
+
+    private async Task IssueAndSendOtpAsync(User user)
+    {
+        var code = GenerateOtp();
+        memoryCache.Set(
+            OtpCacheKey(user.Email!),
+            new OtpEntry(user.Id, code, TimeHelper.GetDateTime()),
+            new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = OtpLifetime });
+
+        await emailService.SendRegisterOtpAsync(new EmailMessage
+        {
+            Recipient = user.Email!,
+            OtpCode = code,
+            FirstName = user.FirstName,
+            ExpiryMinutes = (int)OtpLifetime.TotalMinutes
+        });
+    }
+
+    private void EnsureCooldownElapsed(string email)
+    {
+        if (memoryCache.TryGetValue(OtpCacheKey(email), out OtpEntry? entry) && entry is not null)
+        {
+            var elapsed = TimeHelper.GetDateTime() - entry.SentAt;
+            if (elapsed < OtpResendCooldown)
+            {
+                var secondsLeft = (int)Math.Ceiling((OtpResendCooldown - elapsed).TotalSeconds);
+                throw new MilliyMockException(429,
+                    $"Please wait {secondsLeft} seconds before requesting a new code.");
+            }
+        }
+    }
+
+    private static string GenerateOtp() => RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+
+    private static string OtpCacheKey(string email) => $"email-otp:{email.Trim().ToLowerInvariant()}";
+
+    private sealed record OtpEntry(long UserId, string Code, DateTime SentAt);
 }
