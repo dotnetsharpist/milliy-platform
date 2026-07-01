@@ -8,6 +8,7 @@ public class UserResultDto
     public string FirstName { get; set; } = null!;
     public string? LastName { get; set; }
     public string? FatherName { get; set; }
+    public string? PhoneNumber { get; set; }
     public string Email { get; set; } = null!;
     public bool EmailConfirmed { get; set; }
     public string? GoogleId { get; set; }
