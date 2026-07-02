@@ -166,6 +166,28 @@ Topic list for the filter dropdown, ordered by `Order`:
 ```
 (The frontend ships with a hardcoded per-subject map until this endpoint exists, then switches.)
 
+## Admin content management — /api/practice/admin
+
+`[Authorize(Roles = "SuperAdmin,Admin")]`. Usable straight from Swagger — no admin UI required.
+
+```
+GET    /api/practice/admin/topics?subject=      → topics incl. Id + QuestionCount
+POST   /api/practice/admin/topics               → create (unique Subject+Slug)
+PUT    /api/practice/admin/topics/{id}          → update; slug/subject rename CASCADES to its questions
+DELETE /api/practice/admin/topics/{id}          → blocked (409) while topic still has questions
+
+GET    /api/practice/admin/questions?subject=&topic=&page=&pageSize=
+POST   /api/practice/admin/questions            → create; topic slug MUST exist for that subject (400 otherwise)
+PUT    /api/practice/admin/questions/{id}
+DELETE /api/practice/admin/questions/{id}       → soft delete
+```
+
+Sync rules enforced by `PracticeAdminService`: questions only attach to existing topics of the same subject; topic slug/subject rename updates all linked questions; topic deletion blocked while questions reference it; slugs normalized to `a-z0-9-`.
+
+Content entry therefore has TWO doors, same tables:
+1. Seed JSON in `src/MilliyMock.Api/seed/` (bulk batches, git-reviewed, auto-applied on deploy)
+2. Admin endpoints via Swagger (one-off adds/edits at runtime)
+
 ## Content seeding
 
 Questions authored as JSON array (same field names as entity, `subject` as enum int, `difficulty` 1..3). Azim + Claude produce batches; committed to this repo under `seed/practice-questions/*.json`. Topics seeded the same way from `seed/practice-topics.json` (subject, slug, name, order).

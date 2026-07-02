@@ -33,6 +33,7 @@ public static class ServiceLayerConfiguration
         builder.Services.AddScoped<IUpdateHandler, UpdateHandler>();
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IPracticeService, PracticeService>();
+        builder.Services.AddScoped<IPracticeAdminService, PracticeAdminService>();
         builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
             httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));
         builder.Services.ConfigureTelegramBotMvc();
