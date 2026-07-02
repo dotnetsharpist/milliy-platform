@@ -17,6 +17,7 @@ public class PracticeQuestionAdminResultDto
     public string CorrectLetter { get; set; } = null!;
     public string? ExplanationTitle { get; set; }
     public string? Explanation { get; set; }
+    public int TimeLimitSeconds { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -179,6 +179,7 @@ public partial class PracticeAdminService(
                 CorrectLetter = q.CorrectLetter,
                 ExplanationTitle = q.ExplanationTitle,
                 Explanation = q.Explanation,
+                TimeLimitSeconds = q.TimeLimitSeconds,
                 IsActive = q.IsActive,
                 CreatedAt = q.CreatedAt,
             })
@@ -205,6 +206,7 @@ public partial class PracticeAdminService(
             CorrectLetter = validated.Letter,
             ExplanationTitle = NormalizeOptional(dto.ExplanationTitle),
             Explanation = dto.Explanation,
+            TimeLimitSeconds = validated.TimeLimit,
             IsActive = dto.IsActive,
             CreatedBy = HttpContextHelper.UserId,
         });
@@ -234,6 +236,7 @@ public partial class PracticeAdminService(
         question.CorrectLetter = validated.Letter;
         question.ExplanationTitle = NormalizeOptional(dto.ExplanationTitle);
         question.Explanation = dto.Explanation;
+        question.TimeLimitSeconds = validated.TimeLimit;
         question.IsActive = dto.IsActive;
         question.UpdatedBy = HttpContextHelper.UserId;
         question.UpdatedAt = TimeHelper.GetDateTime();
@@ -252,7 +255,7 @@ public partial class PracticeAdminService(
 
     // ------------------------------------------------------------ Helpers
 
-    private async Task<(string Topic, string Text, string Letter)> ValidateQuestionAsync(SavePracticeQuestionDto dto)
+    private async Task<(string Topic, string Text, string Letter, int TimeLimit)> ValidateQuestionAsync(SavePracticeQuestionDto dto)
     {
         var text = dto.Text?.Trim();
         if (string.IsNullOrWhiteSpace(text))
@@ -269,6 +272,11 @@ public partial class PracticeAdminService(
         if (dto.Grade is < 5 or > 11)
             throw new MilliyMockException(400, "Grade must be between 5 and 11, or null");
 
+        // A missing/zero time falls back to 60s; otherwise clamp to a sane range.
+        var timeLimit = dto.TimeLimitSeconds <= 0 ? 60 : dto.TimeLimitSeconds;
+        if (timeLimit is < 5 or > 3600)
+            throw new MilliyMockException(400, "TimeLimitSeconds must be between 5 and 3600");
+
         // The sync rule: a question may only live inside an existing topic
         // of the same subject.
         var topicSlug = NormalizeSlug(dto.Topic);
@@ -278,7 +286,7 @@ public partial class PracticeAdminService(
             throw new MilliyMockException(400,
                 $"Topic '{topicSlug}' does not exist for this subject. Create the topic first");
 
-        return (topicSlug, text, letter);
+        return (topicSlug, text, letter, timeLimit);
     }
 
     private static string NormalizeSlug(string? slug)
@@ -318,6 +326,7 @@ public partial class PracticeAdminService(
         CorrectLetter = question.CorrectLetter,
         ExplanationTitle = question.ExplanationTitle,
         Explanation = question.Explanation,
+        TimeLimitSeconds = question.TimeLimitSeconds,
         IsActive = question.IsActive,
         CreatedAt = question.CreatedAt,
     };

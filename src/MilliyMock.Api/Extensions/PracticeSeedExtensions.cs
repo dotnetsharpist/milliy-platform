@@ -96,6 +96,7 @@ public static class PracticeSeedExtensions
                     CorrectLetter = seed.CorrectLetter.Trim().ToUpperInvariant(),
                     ExplanationTitle = seed.ExplanationTitle,
                     Explanation = seed.Explanation,
+                    TimeLimitSeconds = seed.TimeLimitSeconds is > 0 ? seed.TimeLimitSeconds.Value : 60,
                     IsActive = true,
                 });
                 inserted++;
@@ -114,5 +115,6 @@ public static class PracticeSeedExtensions
     private sealed record QuestionSeed(
         int Subject, int? Grade, int Difficulty, string Topic, string Text,
         string OptionA, string OptionB, string OptionC, string OptionD,
-        string CorrectLetter, string? ExplanationTitle, string? Explanation);
+        string CorrectLetter, string? ExplanationTitle, string? Explanation,
+        int? TimeLimitSeconds);
 }

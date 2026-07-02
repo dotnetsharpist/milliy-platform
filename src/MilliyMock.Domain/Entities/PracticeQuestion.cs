@@ -17,6 +17,7 @@ public class PracticeQuestion : Auditable
     public string CorrectLetter { get; set; } = null!; // "A".."D" — never serialize to client before answer
     public string? ExplanationTitle { get; set; }
     public string? Explanation { get; set; } // paragraphs separated by \n\n, LaTeX allowed
+    public int TimeLimitSeconds { get; set; } = 60; // suggested time for this question
     public bool IsActive { get; set; } = true;
 
     public ICollection<PracticeAttempt> Attempts { get; set; } = new List<PracticeAttempt>();

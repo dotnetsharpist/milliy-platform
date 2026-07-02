@@ -75,6 +75,7 @@ public class PracticeService(
                 OptionB = q.OptionB,
                 OptionC = q.OptionC,
                 OptionD = q.OptionD,
+                TimeLimitSeconds = q.TimeLimitSeconds,
                 IsSaved = saved.Any(s => s.PracticeQuestionId == q.Id),
                 LastResult = attempts
                     .Where(a => a.PracticeQuestionId == q.Id)

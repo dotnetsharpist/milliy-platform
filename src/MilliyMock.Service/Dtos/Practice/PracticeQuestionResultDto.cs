@@ -14,6 +14,7 @@ public class PracticeQuestionResultDto
     public string OptionB { get; set; } = null!;
     public string OptionC { get; set; } = null!;
     public string OptionD { get; set; } = null!;
+    public int TimeLimitSeconds { get; set; }
     public bool IsSaved { get; set; }
     public string? LastResult { get; set; } // "correct" | "incorrect" | null
 }

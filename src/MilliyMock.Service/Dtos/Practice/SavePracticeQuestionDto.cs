@@ -18,5 +18,6 @@ public class SavePracticeQuestionDto
     public string CorrectLetter { get; set; } = null!; // "A".."D"
     public string? ExplanationTitle { get; set; }
     public string? Explanation { get; set; }
+    public int TimeLimitSeconds { get; set; } = 60; // 5..3600
     public bool IsActive { get; set; } = true;
 }

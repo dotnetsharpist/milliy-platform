@@ -1,6 +1,7 @@
 [
   {
     "subject": 1, "grade": 9, "difficulty": 2, "topic": "tenglamalar",
+    "timeLimitSeconds": 90,
     "text": "$x^2 - 5x + 6 = 0$ tenglamaning ildizlari yig'indisini toping.",
     "optionA": "$5$", "optionB": "$6$", "optionC": "$-5$", "optionD": "$1$",
     "correctLetter": "A",
@@ -65,6 +66,7 @@
   },
   {
     "subject": 3, "grade": 7, "difficulty": 1, "topic": "temuriylar-davri",
+    "timeLimitSeconds": 30,
     "text": "Amir Temur qaysi yilda tug'ilgan?",
     "optionA": "1336-yil", "optionB": "1370-yil", "optionC": "1405-yil", "optionD": "1360-yil",
     "correctLetter": "A",

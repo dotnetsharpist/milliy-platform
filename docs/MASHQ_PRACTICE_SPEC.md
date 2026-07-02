@@ -44,6 +44,7 @@ public class PracticeQuestion : Auditable
     public string CorrectLetter { get; set; } = null!;  // "A" | "B" | "C" | "D"
     public string? ExplanationTitle { get; set; }
     public string? Explanation { get; set; }            // paragraphs separated by \n\n, LaTeX allowed
+    public int TimeLimitSeconds { get; set; } = 60;     // suggested time for the question (5..3600)
     public bool IsActive { get; set; } = true;
 }
 ```
@@ -200,7 +201,8 @@ Sample question object:
 
 ```json
 {
-  "subject": 1, "grade": 9, "difficulty": 2, "topic": "algebra",
+  "subject": 1, "grade": 9, "difficulty": 2, "topic": "tenglamalar",
+  "timeLimitSeconds": 90,
   "text": "$x^2 - 5x + 6 = 0$ tenglamaning ildizlari yig'indisini toping.",
   "optionA": "$5$", "optionB": "$6$", "optionC": "$-5$", "optionD": "$1$",
   "correctLetter": "A",
@@ -208,6 +210,7 @@ Sample question object:
   "explanation": "Viet teoremasiga ko'ra $x_1 + x_2 = -\\frac{b}{a} = 5$.\n\nJavob: A."
 }
 ```
+`timeLimitSeconds` optional (default 60). `grade` optional (null = any). All other fields required.
 
 ## Non-goals v1
 
