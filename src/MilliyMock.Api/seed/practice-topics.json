@@ -1,0 +1,33 @@
+[
+  { "subject": 1, "slug": "sonlar", "name": "Sonlar va amallar", "section": "Algebra", "order": 1 },
+  { "subject": 1, "slug": "algebra", "name": "Algebraik ifodalar", "section": "Algebra", "order": 2 },
+  { "subject": 1, "slug": "tenglamalar", "name": "Tenglama va tengsizliklar", "section": "Algebra", "order": 3 },
+  { "subject": 1, "slug": "funksiyalar", "name": "Funksiyalar va grafiklar", "section": "Algebra", "order": 4 },
+  { "subject": 1, "slug": "progressiyalar", "name": "Progressiyalar", "section": "Algebra", "order": 5 },
+  { "subject": 1, "slug": "logarifmlar", "name": "Daraja va logarifmlar", "section": "Algebra", "order": 6 },
+  { "subject": 1, "slug": "trigonometriya", "name": "Trigonometriya", "section": "Algebra", "order": 7 },
+  { "subject": 1, "slug": "ehtimollik", "name": "Ehtimollik va statistika", "section": "Algebra", "order": 8 },
+  { "subject": 1, "slug": "matnli-masalalar", "name": "Matnli masalalar", "section": "Algebra", "order": 9 },
+  { "subject": 1, "slug": "planimetriya", "name": "Planimetriya", "section": "Geometriya", "order": 10 },
+  { "subject": 1, "slug": "stereometriya", "name": "Stereometriya", "section": "Geometriya", "order": 11 },
+
+  { "subject": 3, "slug": "eng-qadimgi-davr", "name": "Eng qadimgi davr", "section": "O'zbekiston tarixi", "order": 1 },
+  { "subject": 3, "slug": "antik-davr", "name": "Antik davr davlatlari", "section": "O'zbekiston tarixi", "order": 2 },
+  { "subject": 3, "slug": "ilk-orta-asrlar", "name": "Ilk o'rta asrlar", "section": "O'zbekiston tarixi", "order": 3 },
+  { "subject": 3, "slug": "temuriylar-davri", "name": "Amir Temur va temuriylar davri", "section": "O'zbekiston tarixi", "order": 4 },
+  { "subject": 3, "slug": "xonliklar-davri", "name": "Xonliklar davri", "section": "O'zbekiston tarixi", "order": 5 },
+  { "subject": 3, "slug": "chor-rossiyasi-davri", "name": "Chor Rossiyasi istilosi davri", "section": "O'zbekiston tarixi", "order": 6 },
+  { "subject": 3, "slug": "sovet-davri", "name": "Sovet davri", "section": "O'zbekiston tarixi", "order": 7 },
+  { "subject": 3, "slug": "mustaqillik-davri", "name": "Mustaqillik davri", "section": "O'zbekiston tarixi", "order": 8 },
+  { "subject": 3, "slug": "qadimgi-dunyo", "name": "Qadimgi dunyo tarixi", "section": "Jahon tarixi", "order": 9 },
+  { "subject": 3, "slug": "orta-asrlar", "name": "O'rta asrlar", "section": "Jahon tarixi", "order": 10 },
+  { "subject": 3, "slug": "yangi-davr", "name": "Yangi davr", "section": "Jahon tarixi", "order": 11 },
+  { "subject": 3, "slug": "eng-yangi-davr", "name": "Eng yangi davr", "section": "Jahon tarixi", "order": 12 },
+
+  { "subject": 4, "slug": "mexanika", "name": "Mexanika", "section": null, "order": 1 },
+  { "subject": 4, "slug": "molekulyar-fizika", "name": "Molekulyar fizika va termodinamika", "section": null, "order": 2 },
+  { "subject": 4, "slug": "elektr", "name": "Elektr va magnetizm", "section": null, "order": 3 },
+  { "subject": 4, "slug": "tebranishlar-tolqinlar", "name": "Tebranishlar va to'lqinlar", "section": null, "order": 4 },
+  { "subject": 4, "slug": "optika", "name": "Optika", "section": null, "order": 5 },
+  { "subject": 4, "slug": "atom-yadro", "name": "Atom va yadro fizikasi", "section": null, "order": 6 }
+]

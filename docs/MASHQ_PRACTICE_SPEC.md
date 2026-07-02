@@ -2,6 +2,12 @@
 
 Handover from Azim → backend. Frontend page already built (`/mashq`, currently hidden); needs these entities + endpoints to go live.
 
+> **STATUS: fully implemented on this branch.** Entities, `PracticeService`, `PracticeController`,
+> DI registration, UnitOfWork repos, and the JSON seeder (`app.SeedPracticeData()` after
+> `ApplyMigrations()` in Program.cs) are all committed. Seed content lives in
+> `src/MilliyMock.Api/seed/` (copied to output via csproj). **The only remaining step is:**
+> `dotnet ef migrations add AddPracticeTables` → review → merge → deploy (migrations+seed apply on startup).
+
 ## Goal
 
 Question bank practice mode. Student picks filters (subject, grade, difficulty, topic, status) → server serves matching questions one-by-one → student answers → server returns verdict + explanation. 10 free questions/day; 2 tanga buys +10 more that day.
@@ -85,8 +91,9 @@ public class PracticeQuotaPurchase : Auditable
 public class PracticeTopic : Auditable
 {
     public SubjectType Subject { get; set; }
-    public string Slug { get; set; } = null!; // "algebra", "tarix-uzb", ...
+    public string Slug { get; set; } = null!; // "algebra", "temuriylar-davri", ...
     public string Name { get; set; } = null!; // display label, uz
+    public string? Section { get; set; } // grouping, e.g. "O'zbekiston tarixi" / "Jahon tarixi"
     public int Order { get; set; }
 }
 // unique index (Subject, Slug)

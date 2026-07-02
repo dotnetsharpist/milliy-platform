@@ -81,6 +81,7 @@ app.UseSerilogRequestLogging(options =>
 });
 
 app.ApplyMigrations();
+app.SeedPracticeData();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())

@@ -24,6 +24,11 @@ public class UnitOfWork(MilliyMockDbContext dbContext) : IUnitOfWork
     public IRepository<UserAnswer> UserAnswer { get; } = new Repository<UserAnswer>(dbContext);
     public IRepository<UserBalance> UserBalances { get; } = new Repository<UserBalance>(dbContext);
     public IRepository<TransactionHistory> TransactionHistories { get; } = new Repository<TransactionHistory>(dbContext);
+    public IRepository<PracticeQuestion> PracticeQuestions { get; } = new Repository<PracticeQuestion>(dbContext);
+    public IRepository<PracticeAttempt> PracticeAttempts { get; } = new Repository<PracticeAttempt>(dbContext);
+    public IRepository<PracticeSavedQuestion> PracticeSavedQuestions { get; } = new Repository<PracticeSavedQuestion>(dbContext);
+    public IRepository<PracticeQuotaPurchase> PracticeQuotaPurchases { get; } = new Repository<PracticeQuotaPurchase>(dbContext);
+    public IRepository<PracticeTopic> PracticeTopics { get; } = new Repository<PracticeTopic>(dbContext);
 
     public async Task<bool> SaveChangesAsync()
     {

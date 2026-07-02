@@ -17,5 +17,10 @@ public interface IUnitOfWork : IDisposable
     IRepository<UserAnswer> UserAnswer { get; }
     IRepository<UserBalance> UserBalances { get; }
     IRepository<TransactionHistory> TransactionHistories { get; }
+    IRepository<PracticeQuestion> PracticeQuestions { get; }
+    IRepository<PracticeAttempt> PracticeAttempts { get; }
+    IRepository<PracticeSavedQuestion> PracticeSavedQuestions { get; }
+    IRepository<PracticeQuotaPurchase> PracticeQuotaPurchases { get; }
+    IRepository<PracticeTopic> PracticeTopics { get; }
     Task<bool> SaveChangesAsync();
 }

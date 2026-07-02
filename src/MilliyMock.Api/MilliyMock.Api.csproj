@@ -33,6 +33,9 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <Content Remove="wwwroot\images\FILE_74b79306-f67b-48fa-8020-bdaad23f8113.png" />
+        <Content Include="seed\**\*.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

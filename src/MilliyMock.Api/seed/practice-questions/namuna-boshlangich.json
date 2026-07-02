@@ -1,0 +1,99 @@
+[
+  {
+    "subject": 1, "grade": 9, "difficulty": 2, "topic": "tenglamalar",
+    "text": "$x^2 - 5x + 6 = 0$ tenglamaning ildizlari yig'indisini toping.",
+    "optionA": "$5$", "optionB": "$6$", "optionC": "$-5$", "optionD": "$1$",
+    "correctLetter": "A",
+    "explanationTitle": "Viet teoremasi",
+    "explanation": "Viet teoremasiga ko'ra $x_1 + x_2 = -\\frac{b}{a} = 5$.\n\nJavob: A."
+  },
+  {
+    "subject": 1, "grade": 9, "difficulty": 1, "topic": "tenglamalar",
+    "text": "$3x - 7 = 8$ tenglamani yeching.",
+    "optionA": "$x = 3$", "optionB": "$x = 5$", "optionC": "$x = -5$", "optionD": "$x = 7$",
+    "correctLetter": "B",
+    "explanationTitle": "Chiziqli tenglama",
+    "explanation": "$3x = 15 \\Rightarrow x = 5$.\n\nJavob: B."
+  },
+  {
+    "subject": 1, "grade": 8, "difficulty": 2, "topic": "planimetriya",
+    "text": "To'g'ri burchakli uchburchakning katetlari $6$ va $8$ ga teng. Gipotenuzani toping.",
+    "optionA": "$12$", "optionB": "$14$", "optionC": "$10$", "optionD": "$9$",
+    "correctLetter": "C",
+    "explanationTitle": "Pifagor teoremasi",
+    "explanation": "$c = \\sqrt{6^2 + 8^2} = \\sqrt{100} = 10$.\n\nJavob: C."
+  },
+  {
+    "subject": 1, "grade": 11, "difficulty": 3, "topic": "trigonometriya",
+    "text": "$\\sin^2 x + \\cos^2 x + \\tan^2 x = 4$ bo'lsa, $\\tan^2 x$ ni toping.",
+    "optionA": "$4$", "optionB": "$2$", "optionC": "$1$", "optionD": "$3$",
+    "correctLetter": "D",
+    "explanationTitle": "Asosiy ayniyat",
+    "explanation": "$\\sin^2 x + \\cos^2 x = 1$ ekanligidan $1 + \\tan^2 x = 4$, demak $\\tan^2 x = 3$.\n\nJavob: D."
+  },
+  {
+    "subject": 1, "grade": 10, "difficulty": 2, "topic": "funksiyalar",
+    "text": "$f(x) = 2x + 3$ va $g(x) = x^2$ bo'lsa, $g(f(1))$ ni hisoblang.",
+    "optionA": "$25$", "optionB": "$5$", "optionC": "$11$", "optionD": "$16$",
+    "correctLetter": "A",
+    "explanationTitle": "Murakkab funksiya",
+    "explanation": "$f(1) = 5$, $g(5) = 25$.\n\nJavob: A."
+  },
+  {
+    "subject": 1, "grade": 9, "difficulty": 3, "topic": "ehtimollik",
+    "text": "Tanga uch marta tashlanganda kamida bir marta gerb tushish ehtimolini toping.",
+    "optionA": "$\\frac{3}{8}$", "optionB": "$\\frac{7}{8}$", "optionC": "$\\frac{1}{2}$", "optionD": "$\\frac{5}{8}$",
+    "correctLetter": "B",
+    "explanationTitle": "Qarama-qarshi hodisa",
+    "explanation": "Hech qachon gerb tushmaslik ehtimoli $\\left(\\frac{1}{2}\\right)^3 = \\frac{1}{8}$.\n\nDemak $P = 1 - \\frac{1}{8} = \\frac{7}{8}$.\n\nJavob: B."
+  },
+  {
+    "subject": 1, "grade": 6, "difficulty": 1, "topic": "sonlar",
+    "text": "Sonlarning eng katta umumiy bo'luvchisini toping: $\\text{EKUB}(24; 36)$.",
+    "optionA": "$6$", "optionB": "$18$", "optionC": "$72$", "optionD": "$12$",
+    "correctLetter": "D",
+    "explanationTitle": "EKUB",
+    "explanation": "$24 = 2^3 \\cdot 3$, $36 = 2^2 \\cdot 3^2$; umumiy: $2^2 \\cdot 3 = 12$.\n\nJavob: D."
+  },
+  {
+    "subject": 1, "grade": 7, "difficulty": 2, "topic": "planimetriya",
+    "text": "Uchburchak ichki burchaklarining yig'indisi necha gradus?",
+    "optionA": "$360°$", "optionB": "$180°$", "optionC": "$90°$", "optionD": "$270°$",
+    "correctLetter": "B",
+    "explanationTitle": "Ichki burchaklar",
+    "explanation": "Har qanday uchburchak ichki burchaklarining yig'indisi $180°$ ga teng.\n\nJavob: B."
+  },
+  {
+    "subject": 3, "grade": 7, "difficulty": 1, "topic": "temuriylar-davri",
+    "text": "Amir Temur qaysi yilda tug'ilgan?",
+    "optionA": "1336-yil", "optionB": "1370-yil", "optionC": "1405-yil", "optionD": "1360-yil",
+    "correctLetter": "A",
+    "explanationTitle": "Sohibqiron tavalludi",
+    "explanation": "Amir Temur 1336-yil 9-aprelda Kesh (hozirgi Shahrisabz) yaqinidagi Xo'ja Ilg'or qishlog'ida tug'ilgan.\n\nJavob: A."
+  },
+  {
+    "subject": 3, "grade": 8, "difficulty": 2, "topic": "ilk-orta-asrlar",
+    "text": "Buyuk ipak yo'lining asosiy tarmog'i qaysi shaharlar orqali o'tgan?",
+    "optionA": "Buxoro va Samarqand", "optionB": "Toshkent va Namangan",
+    "optionC": "Xiva va Nukus", "optionD": "Qo'qon va Andijon",
+    "correctLetter": "A",
+    "explanationTitle": "Ipak yo'li",
+    "explanation": "Buyuk ipak yo'lining markaziy tarmog'i Movarounnahrning yirik savdo markazlari — Buxoro va Samarqand orqali o'tgan.\n\nJavob: A."
+  },
+  {
+    "subject": 4, "grade": 9, "difficulty": 1, "topic": "mexanika",
+    "text": "Jism $20\\,\\text{m/s}$ tezlik bilan $5\\,\\text{s}$ davomida tekis harakatlandi. Bosib o'tilgan yo'lni toping.",
+    "optionA": "$50\\,\\text{m}$", "optionB": "$100\\,\\text{m}$", "optionC": "$25\\,\\text{m}$", "optionD": "$4\\,\\text{m}$",
+    "correctLetter": "B",
+    "explanationTitle": "Tekis harakat",
+    "explanation": "$s = v \\cdot t = 20 \\cdot 5 = 100\\,\\text{m}$.\n\nJavob: B."
+  },
+  {
+    "subject": 4, "grade": 10, "difficulty": 2, "topic": "elektr",
+    "text": "Zanjir bo'lagida kuchlanish $12\\,\\text{V}$, qarshilik $4\\,\\Omega$. Tok kuchini toping.",
+    "optionA": "$48\\,\\text{A}$", "optionB": "$0{,}3\\,\\text{A}$", "optionC": "$3\\,\\text{A}$", "optionD": "$8\\,\\text{A}$",
+    "correctLetter": "C",
+    "explanationTitle": "Om qonuni",
+    "explanation": "$I = \\frac{U}{R} = \\frac{12}{4} = 3\\,\\text{A}$.\n\nJavob: C."
+  }
+]

@@ -8,7 +8,8 @@ namespace MilliyMock.Domain.Entities;
 public class PracticeTopic : Auditable
 {
     public SubjectType Subject { get; set; }
-    public string Slug { get; set; } = null!; // "algebra", "tarix-uzb", ...
+    public string Slug { get; set; } = null!; // "algebra", "temuriylar-davri", ...
     public string Name { get; set; } = null!; // display label, uz
+    public string? Section { get; set; } // optional grouping, e.g. "O'zbekiston tarixi" / "Jahon tarixi"
     public int Order { get; set; }
 }
