@@ -37,6 +37,24 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
             .IsUnique()
             .HasFilter("\"IsDeleted\" = false");
 
+        modelBuilder.Entity<PracticeQuestion>()
+            .HasIndex(pq => new { pq.Subject, pq.Grade, pq.Difficulty, pq.Topic });
+
+        modelBuilder.Entity<PracticeAttempt>()
+            .HasIndex(pa => new { pa.UserId, pa.PracticeQuestionId });
+
+        // daily-quota lookup: attempts by user within a day
+        modelBuilder.Entity<PracticeAttempt>()
+            .HasIndex(pa => new { pa.UserId, pa.CreatedAt });
+
+        modelBuilder.Entity<PracticeSavedQuestion>()
+            .HasIndex(ps => new { ps.UserId, ps.PracticeQuestionId })
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = false");
+
+        modelBuilder.Entity<PracticeQuotaPurchase>()
+            .HasIndex(pp => new { pp.UserId, pp.Day });
+
         /*
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
@@ -74,4 +92,8 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<UserAnswer> UserAnswers { get; init; }
     public DbSet<UserBalance> UserBalances { get; init; }
     public DbSet<TransactionHistory> TransactionHistories { get; init; }
+    public DbSet<PracticeQuestion> PracticeQuestions { get; init; }
+    public DbSet<PracticeAttempt> PracticeAttempts { get; init; }
+    public DbSet<PracticeSavedQuestion> PracticeSavedQuestions { get; init; }
+    public DbSet<PracticeQuotaPurchase> PracticeQuotaPurchases { get; init; }
 }
