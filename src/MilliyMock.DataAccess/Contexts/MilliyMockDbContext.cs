@@ -55,6 +55,11 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<PracticeQuotaPurchase>()
             .HasIndex(pp => new { pp.UserId, pp.Day });
 
+        modelBuilder.Entity<PracticeTopic>()
+            .HasIndex(pt => new { pt.Subject, pt.Slug })
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = false");
+
         /*
         var hasUsers = modelBuilder.Entity<User>().HasData(
             new User
@@ -96,4 +101,5 @@ public class MilliyMockDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<PracticeAttempt> PracticeAttempts { get; init; }
     public DbSet<PracticeSavedQuestion> PracticeSavedQuestions { get; init; }
     public DbSet<PracticeQuotaPurchase> PracticeQuotaPurchases { get; init; }
+    public DbSet<PracticeTopic> PracticeTopics { get; init; }
 }

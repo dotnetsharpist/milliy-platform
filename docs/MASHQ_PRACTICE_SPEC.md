@@ -79,6 +79,19 @@ public class PracticeQuotaPurchase : Auditable
 // index: (UserId, Day)
 ```
 
+```csharp
+// Catalog of topics per subject — feeds the frontend topic filter dropdown.
+// PracticeQuestion.Topic stores the Slug (loose join keeps JSON seeding simple).
+public class PracticeTopic : Auditable
+{
+    public SubjectType Subject { get; set; }
+    public string Slug { get; set; } = null!; // "algebra", "tarix-uzb", ...
+    public string Name { get; set; } = null!; // display label, uz
+    public int Order { get; set; }
+}
+// unique index (Subject, Slug)
+```
+
 New enum (MilliyMock.Domain/Enums):
 
 ```csharp
@@ -138,9 +151,17 @@ Insufficient balance → same error shape as premium test purchase (frontend reu
 ### POST /api/practice/save  /  DELETE /api/practice/save/{questionId}
 Toggle saved state.
 
+### GET /api/practice/topics?subject=1
+Topic list for the filter dropdown, ordered by `Order`:
+
+```json
+[{ "slug": "algebra", "name": "Algebra" }, { "slug": "geometriya", "name": "Geometriya" }]
+```
+(The frontend ships with a hardcoded per-subject map until this endpoint exists, then switches.)
+
 ## Content seeding
 
-Questions authored as JSON array (same field names as entity, `subject` as enum int, `difficulty` 1..3). Azim + Claude produce batches; committed to this repo under `seed/practice-questions/*.json`.
+Questions authored as JSON array (same field names as entity, `subject` as enum int, `difficulty` 1..3). Azim + Claude produce batches; committed to this repo under `seed/practice-questions/*.json`. Topics seeded the same way from `seed/practice-topics.json` (subject, slug, name, order).
 Loading mechanism = backend's choice, two options:
 1. Idempotent startup seeder (insert where not exists by content hash) — preferred, no migration bloat;
 2. Generated SQL INSERT script run manually with migration.
